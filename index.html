@@ -189,15 +189,16 @@
   .logo svg path{stroke:var(--panel);stroke-width:.6}
   header:hover .logo svg{transform:rotate(180deg)}
   .home-wheel{display:flex;justify-content:center;margin:2px 0 12px}
-  .bigwheel{width:540px;max-width:94%;height:auto;overflow:visible;animation:fadein .35s ease}
+  .bigwheel{width:600px;max-width:94%;height:auto;overflow:visible;animation:fadein .35s ease}
   .bigwheel .fam-wedge{stroke:var(--wheel-stroke);stroke-width:1;transition:fill .25s ease}
   .bigwheel .fam-label{font:600 8px system-ui;letter-spacing:.2px;cursor:pointer}
   .bigwheel .ing-wedge{stroke:var(--wheel-stroke);stroke-width:.5;transition:fill .3s ease}
   .bigwheel .ing-wedge.off{fill:var(--wheel-off);stroke:var(--line)}
-  .bigwheel .ing-wedge.picked{stroke:var(--ink);stroke-width:2.4}
-  .bigwheel g:hover .ing-wedge{stroke:var(--ink);stroke-width:1.5}
+  .bigwheel .ing-wedge.picked{stroke:var(--accent-ink);stroke-width:2.8}
+  .bigwheel g:hover .ing-wedge{stroke:var(--ink);stroke-width:1.6;filter:brightness(1.08)}
   .bigwheel .ing-wlabel{fill:var(--ink);font-family:var(--font-ui);font-weight:500;pointer-events:none}
   .bigwheel g:hover .ing-wlabel{font-weight:700;fill:var(--accent-ink)}
+  .bigwheel .ing-wlabel.picked{font-weight:700;fill:var(--accent-ink)}
   .bigwheel .ing-wlabel.off{fill:var(--wheel-off-ink)}
   .bigwheel .wheel-hub{fill:var(--hub);cursor:pointer}
   .bigwheel .wheel-center{fill:#fff;font:600 11px var(--font-display);pointer-events:none}
@@ -739,20 +740,21 @@
       p.setAttribute('fill', (picked||comp)?famColor(ing.family):'#ffffff');
       p.setAttribute('class','ing-wedge'+(picked?' picked':'')+(comp?'':' off'));
       const [lx,ly]=pol(R.lab,am), deg=am*180/Math.PI, left=Math.cos(am)<0;
-      const t=document.createElementNS(SVGNS,'text'); t.textContent=ing.name; t.setAttribute('class','ing-wlabel'+(comp||picked?'':' off')); t.setAttribute('font-size',fs);
+      const t=document.createElementNS(SVGNS,'text'); t.textContent=ing.name; t.setAttribute('class','ing-wlabel'+(picked?' picked':'')+(comp||picked?'':' off')); t.setAttribute('font-size',fs);
       t.setAttribute('x',lx); t.setAttribute('y',ly); t.setAttribute('text-anchor',left?'end':'start'); t.setAttribute('dominant-baseline','middle');
       t.setAttribute('transform',`rotate(${left?deg+180:deg} ${lx} ${ly})`);
       const g=document.createElementNS(SVGNS,'g'); g.style.cursor='pointer'; g.appendChild(p); g.appendChild(t);
       g.addEventListener('click',()=>toggleSel(id));
-      g.addEventListener('mouseenter',()=>{center.textContent=ing.name;});
-      g.addEventListener('mouseleave',()=>{center.textContent=def();});
+      g.addEventListener('mouseenter',()=>setCenter(ing.name));
+      g.addEventListener('mouseleave',()=>setCenter(def()));
       svg.appendChild(g);
     });
     const hub=document.createElementNS(SVGNS,'circle'); hub.setAttribute('r',R.hub); hub.setAttribute('class','wheel-hub');
     hub.addEventListener('click',()=>{ if(state.sel.length){state.sel=[];state.resultQuery='';renderAll();} }); svg.appendChild(hub);
     const center=document.createElementNS(SVGNS,'text'); center.setAttribute('class','wheel-center'); center.setAttribute('text-anchor','middle'); center.setAttribute('dominant-baseline','middle');
     const def=()=> state.sel.length? (state.sel.length+(state.sel.length===1?' scelto':' scelti')) : 'FOOD·LAB';
-    center.textContent=def(); svg.appendChild(center);
+    const setCenter=txt=>{center.textContent=txt; center.style.fontSize=(txt.length>13?Math.max(8,Math.round(150/txt.length)):11.5)+'px';};
+    setCenter(def()); svg.appendChild(center);
     return svg;
   }
 
