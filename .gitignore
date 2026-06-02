@@ -1,9 +1,12 @@
-# --- COPYRIGHT: mai pubblicare i libri o il testo grezzo estratto ---
+# COPYRIGHT: mai pubblicare i libri, i PDF o il testo grezzo estratto
 LIBRARY/
 *.pdf
-tools/pipeline/out/        # intermedi: span/note grezze = prosa dei libri, NON pubblicabile
-
-# --- ambiente / locale ---
+# intermedi della pipeline (span/note/passi grezzi = materiale dei libri): NON pubblicabile
+tools/pipeline/out/
+# cache / ambiente / locale
+tools/pipeline/__pycache__/
+__pycache__/
+*.pyc
 .claude/
 node_modules/
 *.log
