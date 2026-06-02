@@ -7,27 +7,37 @@
 <style>
 @font-face{font-family:'Inter';font-weight:100 900;font-display:swap;src:url('../fonts/inter-latin.woff2') format('woff2')}
 @font-face{font-family:'Fraunces';font-weight:100 900;font-display:swap;src:url('../fonts/fraunces-latin.woff2') format('woff2')}
-:root{--bg:#f4f0e8;--panel:#fffefb;--ink:#23201c;--muted:#857a6b;--line:#e6ddcd;--accent:#d4521f;--accent-ink:#c2611f;--shadow:0 1px 2px rgba(60,40,20,.05),0 12px 32px -14px rgba(60,40,20,.22);--font-ui:'Inter',system-ui,sans-serif;--font-display:'Fraunces',Georgia,serif}
+:root{--bg:#f4f0e8;--panel:#fffefb;--ink:#23201c;--muted:#857a6b;--line:#e6ddcd;--accent:#d4521f;--accent-ink:#c2611f;--ok:#5a8a3c;--shadow:0 1px 2px rgba(60,40,20,.05),0 12px 32px -14px rgba(60,40,20,.22);--font-ui:'Inter',system-ui,sans-serif;--font-display:'Fraunces',Georgia,serif}
 *{box-sizing:border-box}
 body{margin:0;font:16px/1.6 var(--font-ui);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
-.wrap{max-width:760px;margin:0 auto;padding:54px 24px}
+.wrap{max-width:780px;margin:0 auto;padding:50px 24px}
 h1{font-family:var(--font-display);font-size:34px;margin:0 0 6px;letter-spacing:-.015em}
-.sub{color:var(--muted);margin:0 0 32px}
-a.card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow);transition:transform .15s,border-color .15s}
+.sub{color:var(--muted);margin:0 0 30px}
+a.card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 22px;margin-bottom:14px;box-shadow:var(--shadow);transition:transform .15s,border-color .15s}
 a.card:hover{transform:translateY(-2px);border-color:var(--accent)}
-a.card h2{font-family:var(--font-display);font-size:22px;margin:0 0 4px;color:var(--accent-ink)}
+a.card h2{font-family:var(--font-display);font-size:21px;margin:0 0 4px;color:var(--accent-ink);display:flex;align-items:center;gap:10px}
 a.card p{margin:0;color:var(--muted);font-size:14px}
-.note{color:var(--muted);font-size:13px;margin-top:28px;border-top:1px dashed var(--line);padding-top:16px}
+.tagok{font-size:11px;font-weight:600;color:#fff;background:var(--ok);border-radius:999px;padding:2px 9px}
+.tagnew{font-size:11px;font-weight:600;color:#fff;background:var(--accent);border-radius:999px;padding:2px 9px}
+.tagcho{font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.dead{opacity:.5;text-decoration:line-through}
+.note{color:var(--muted);font-size:13px;margin-top:26px;border-top:1px dashed var(--line);padding-top:16px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>FOOD·LAB — Mockup grafici</h1>
-  <p class="sub">Alternative per le ruote della v2, con dati reali e interazioni. Apri ognuna, prova hover/tocco e il toggle tema in alto a destra, poi dimmi quali funzionano meglio (es. «E2 + M1 + R1»).</p>
-  <a class="card" href="esplora.html"><h2>🧪 Esplora — la ruota concentrica</h2><p>4 alternative: E1 ingrandisci+curve · E2 zoom famiglie · E3 ruota+lista · E4 espansione al focus</p></a>
-  <a class="card" href="matrice.html"><h2>🧬 Matrice — il profilo aromatico</h2><p>3 alternative: M1 barre · M2 radiale fatto bene · M4 barre+radiale (toggle) — con selettore ingrediente</p></a>
-  <a class="card" href="ruota.html"><h2>🎡 Ruota — la cascata</h2><p>3 alternative: R1 una ruota grande per passo · R2 cascata affiancata · R3 colonne/liste</p></a>
-  <p class="note">Sono bozze per scegliere la direzione grafica: rendono il concetto, non sono ancora l'app finale. Una volta scelto, sviluppo la versione definitiva e curata dentro FOOD·LAB.</p>
+  <p class="sub">Bozze interattive con dati reali. Apri ognuna, prova hover/tocco e il toggle tema in alto a destra.</p>
+
+  <a class="card" href="naviga.html"><h2>🧭 Naviga <span class="tagnew">NUOVO</span></h2><p>2ª vista ipertestuale: macro-gruppi → famiglie (nomi chiari) → ingredienti, navigabile anche per tipo/stagione, con abbinamenti come link colorati cliccabili.</p></a>
+
+  <a class="card" href="esplora.html"><h2>🧪 Esplora — la ruota <span class="tagok">scelto: E2</span></h2><p>Le 4 alternative della ruota concentrica. Hai scelto <b>E2 · zoom sulle famiglie</b>.</p></a>
+
+  <a class="card" href="ruota.html"><h2>🎡 Ruota — la cascata <span class="tagcho">da scegliere</span></h2><p>R1 una ruota grande per passo · R2 cascata affiancata · R3 colonne/liste.</p></a>
+
+  <a class="card" style="cursor:default" onclick="return false"><h2>🧬 Matrice <span class="tagcho">rimossa</span></h2><p class="dead">M1 barre · M2 radiale · M4 toggle</p><p>Rimossa: i profili erano stime AI, non dal libro reale.</p></a>
+
+  <p class="note">⏳ In arrivo: mockup <b>Akinator</b> (domande mirate → ti porta a ingredienti, combo o piatto/occasione).</p>
 </div>
 </body>
 </html>
