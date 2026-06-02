@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FOOD LAB — Matrice dei Sapori</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#c2611f">
+<link rel="icon" href="./icon.svg">
+<link rel="apple-touch-icon" href="./icon.svg">
+<style>
+  :root{
+    --bg:#faf7f1; --panel:#fffdf9; --ink:#2b2622; --muted:#8a7f72;
+    --line:#e9e0d2; --accent:#c2611f; --accent2:#d99a2b;
+    --ok:#5a8a3c; --warn:#b8742a; --neutral:#9a9186;
+    --shadow:0 1px 3px rgba(60,40,20,.08),0 6px 20px rgba(60,40,20,.06);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:600;margin:0}
+  button{font:inherit;cursor:pointer}
+  header{display:flex;align-items:baseline;gap:14px;padding:16px 22px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
+  header h1{font-size:22px;letter-spacing:.5px}
+  header .sub{color:var(--muted);font-size:13px}
+  header .attr{margin-left:auto;color:var(--muted);font-size:12px;text-align:right}
+  .app{display:grid;grid-template-columns:320px 1fr;gap:0;height:calc(100vh - 60px)}
+  .side{border-right:1px solid var(--line);overflow:auto;padding:16px;background:var(--panel)}
+  .main{overflow:auto;padding:20px 24px}
+  .block{margin-bottom:18px}
+  .block h3{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px;font-family:system-ui}
+  .search{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;color:var(--ink);display:inline-flex;align-items:center;gap:6px;transition:.12s}
+  .chip:hover{border-color:var(--accent)}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .chip .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .ing-list{display:flex;flex-direction:column;gap:2px;max-height:42vh;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:6px;background:#fff}
+  .ing{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;cursor:pointer}
+  .ing:hover{background:#f5efe4}
+  .ing.sel{background:#fcefe0}
+  .ing .nm{flex:1}
+  .ing .deg{color:var(--muted);font-size:11px}
+  .fam-tag{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+  .sel-wrap{display:flex;flex-wrap:wrap;gap:6px;min-height:10px}
+  .sel-chip{background:var(--ink);color:#fff;border-radius:999px;padding:5px 8px 5px 11px;font-size:12.5px;display:inline-flex;align-items:center;gap:7px}
+  .sel-chip button{background:none;border:none;color:#fff;opacity:.7;font-size:14px;line-height:1;padding:0}
+  .sel-chip button:hover{opacity:1}
+  .muted{color:var(--muted)}
+  .row-between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .btn{padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:#fff;font-size:13px}
+  .btn:hover{border-color:var(--accent);color:var(--accent)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:13px 14px;box-shadow:var(--shadow);cursor:pointer;transition:.12s;position:relative}
+  .card:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .card .top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .card .name{font-weight:600}
+  .card .meta{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+  .badge{font-size:11px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--muted)}
+  .badge.classico{background:#eef6e8;color:var(--ok);border-color:#cfe6bf}
+  .badge.insolito{background:#fdeede;color:var(--warn);border-color:#f3d4ab}
+  .badge.neutro{background:#f1efec;color:var(--neutral)}
+  .badge.match{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .add{position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--accent);font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
+  .add:hover{background:var(--accent);color:#fff}
+  .sec-title{display:flex;align-items:center;gap:10px;margin:20px 0 10px}
+  .sec-title h2{font-size:17px}
+  .sec-title .count{color:var(--muted);font-size:13px}
+  .empty{color:var(--muted);padding:40px 10px;text-align:center;max-width:520px;margin:0 auto}
+  .empty .big{font-size:42px;margin-bottom:8px}
+  /* drawer */
+  .drawer-bg{position:fixed;inset:0;background:rgba(40,30,20,.32);display:none;z-index:20}
+  .drawer-bg.open{display:block}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(440px,92vw);background:var(--panel);box-shadow:-8px 0 30px rgba(60,40,20,.14);transform:translateX(100%);transition:.22s;z-index:21;overflow:auto;padding:22px}
+  .drawer.open{transform:none}
+  .drawer h2{font-size:20px;margin-bottom:2px}
+  .pair-note{border:1px solid var(--line);border-radius:12px;padding:13px;margin-top:12px;background:#fff}
+  .pair-note .ph{font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .kv{font-size:13px;margin:7px 0}
+  .kv b{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.4px;display:block;margin-bottom:2px}
+  .pill{display:inline-block;background:#f4ecdf;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px 4px 2px 0}
+  .cite{font-size:12px;color:var(--muted);margin-top:8px;font-style:italic}
+  .close-x{position:absolute;top:16px;right:18px;border:none;background:none;font-size:22px;color:var(--muted)}
+  .legend{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.7}
+  .note-src{font-size:11px;color:var(--muted);background:#f4ecdf;border-radius:8px;padding:6px 9px;margin-top:10px}
+  /* M1: ricerca risultati, gruppi, preparazioni, confidenza */
+  .result-bar{margin:2px 0 14px}
+  .group-card .gmembers{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+  .gchip{display:inline-flex;align-items:center;gap:5px;font-size:12px;background:#f4ecdf;border-radius:999px;padding:3px 8px;color:var(--ink)}
+  .gchip.insel{background:var(--ink);color:#fff}
+  .prep-box{display:flex;flex-wrap:wrap;gap:6px}
+  .conf{font-size:11px;margin:2px 0 4px;display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-weight:600}
+  .conf::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+  .conf-high{background:#eef6e8;color:var(--ok)}
+  .conf-medium{background:#fbf2e0;color:var(--warn)}
+  .conf-thin{background:#f4e2dd;color:#a4503a}
+  .ing:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  /* M2: reperibilità, preferiti, piatti salvati, editor metadati */
+  .basebar{text-transform:none;font-weight:400;font-size:11px;color:var(--muted)}
+  .basebar button{border:none;background:none;color:var(--accent);font-size:11px;cursor:pointer;text-decoration:underline;padding:0 0 0 3px}
+  .mytools{display:flex;flex-wrap:wrap;gap:6px}
+  .mytools .btn{flex:1;text-align:center;white-space:nowrap;font-size:12px;padding:6px 8px}
+  .btn.act{background:var(--accent);border-color:var(--accent);color:#fff}
+  .star{position:absolute;top:10px;right:38px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:#fff;color:#cdbb8e;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center}
+  .star.on{color:var(--accent2);border-color:var(--accent2)}
+  .star:hover{border-color:var(--accent2)}
+  .ing .istar{color:#d7c9a8;font-size:14px;cursor:pointer;padding:0 2px;line-height:1}
+  .ing .istar.on{color:var(--accent2)}
+  .ing .idet{color:#c4b594;font-size:12.5px;cursor:pointer;padding:0 2px;line-height:1}
+  .ing .idet:hover{color:var(--accent)}
+  .editor{border:1px dashed var(--line);border-radius:12px;padding:12px 13px;margin-top:12px;background:#fffdf9}
+  .editor h4{margin:0 0 4px;font:600 11px system-ui;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);display:flex;align-items:center}
+  .efield{margin:9px 0}
+  .efield>label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
+  .efield select,.efield input{width:100%;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:13px}
+  .sbadge{font-size:9.5px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);text-transform:uppercase;letter-spacing:.4px}
+  .sbadge.ai{background:#f4ecdf;color:var(--warn);border-color:#f3d4ab}
+  .sbadge.user{background:#eef6e8;color:var(--ok);border-color:#cfe6bf}
+  .combo-card{border:1px solid var(--line);border-radius:12px;padding:11px;margin-top:10px;background:#fff}
+  .combo-card .actions{display:flex;gap:6px;margin-top:9px}
+  /* Fase 5: navigazione a schede, piatti, occasioni, stagione, restyle */
+  header{gap:18px}
+  .nav{display:flex;gap:6px}
+  .navbtn{padding:7px 15px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:13.5px;font-weight:500;transition:.15s}
+  .navbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .navbtn.on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 9px rgba(194,97,31,.28)}
+  @keyframes fadein{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+  .main.fade{animation:fadein .28s ease}
+  .dish-card .flag{font-size:18px;line-height:1}
+  .badge.cuisine{background:#f0ece1;color:var(--ink);border-color:#e4dcc9}
+  .dish-note{font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.45}
+  .occ-card{text-align:center;padding:18px 14px}
+  .occ-card .occ-emoji{font-size:34px;line-height:1;margin-bottom:6px}
+  .occ-card .name{font-weight:600;font-size:15px}
+  .occ-card .meta{justify-content:center;margin-top:5px}
+  .season-hero{border-radius:18px;padding:22px;margin-bottom:18px;color:#fff;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .season-hero h2{font-size:27px;margin:3px 0 11px;font-family:Georgia,serif}
+  .season-hero .season-now{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;opacity:.9}
+  .season-hero .season-switch{display:flex;gap:6px;flex-wrap:wrap}
+  .season-hero .chip{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4);color:#fff}
+  .season-hero .chip.on{background:#fff;color:var(--ink);border-color:#fff}
+  .season-hero .hint{color:rgba(255,255,255,.85);font-size:12px;margin-top:9px}
+  .season-primavera{background:linear-gradient(135deg,#7bb661,#a7cf6b)}
+  .season-estate{background:linear-gradient(135deg,#e6a019,#d9762b)}
+  .season-autunno{background:linear-gradient(135deg,#c2611f,#9c4a2a)}
+  .season-inverno{background:linear-gradient(135deg,#5b7fa6,#80a0c2)}
+  .drawer-h3{margin:16px 0 6px;font-family:system-ui;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  .wine-box{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fbf7ef;font-size:13.5px}
+  /* Ruota come identità: logo + home wheel + albero */
+  header h1{display:inline-flex;align-items:center;gap:9px}
+  .logo{display:inline-flex}
+  .logo svg{width:30px;height:30px;transition:transform .6s ease}
+  header:hover .logo svg{transform:rotate(180deg)}
+  .home-wheel{display:flex;justify-content:center;margin:2px 0 12px}
+  .bigwheel{width:540px;max-width:94%;height:auto;overflow:visible;animation:fadein .35s ease}
+  .bigwheel .fam-wedge{stroke:#fffdf9;stroke-width:1;transition:fill .25s ease}
+  .bigwheel .fam-label{font:600 8px system-ui;letter-spacing:.2px;cursor:pointer}
+  .bigwheel .ing-wedge{stroke:#fffdf9;stroke-width:.5;transition:fill .3s ease}
+  .bigwheel .ing-wedge.off{fill:#fff;stroke:#ece5d8}
+  .bigwheel .ing-wedge.picked{stroke:var(--ink);stroke-width:2.4}
+  .bigwheel g:hover .ing-wedge{stroke:var(--ink);stroke-width:1.5}
+  .bigwheel .ing-wlabel{fill:var(--ink);font-family:system-ui;pointer-events:none}
+  .bigwheel .ing-wlabel.off{fill:#d2c7b4}
+  .bigwheel .wheel-hub{fill:var(--ink);cursor:pointer}
+  .bigwheel .wheel-center{fill:#fff;font:600 11px Georgia,serif;pointer-events:none}
+  .tree-bar{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 15px;margin-bottom:14px;font-size:14px;box-shadow:var(--shadow)}
+  /* Matrice dei sapori (sunburst a raggi variabili) */
+  .matrix-wheel{width:560px;max-width:94%;height:auto;overflow:visible;animation:fadein .35s ease}
+  .matrix-wheel .mx-bar-wedge{stroke:#fffdf9;stroke-width:.4;transition:fill .25s ease}
+  .matrix-wheel .mx-band{stroke:#fffdf9;stroke-width:1;cursor:pointer}
+  .matrix-wheel .mx-cat-label{font:600 8px system-ui;fill:#fff;pointer-events:none}
+  .matrix-wheel .wheel-hub{fill:var(--ink)}
+  .matrix-wheel .wheel-center{fill:#fff;font:600 12px Georgia,serif;pointer-events:none}
+  .mx-bar{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .mx-bar .ff label{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);display:block;margin-bottom:3px}
+  .mx-select{padding:7px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font:inherit;font-size:14px;min-width:210px}
+  .mx-legend{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+  .mx-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:3px 9px;background:#fff;cursor:pointer}
+  .mx-chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  /* Fonti & metodo */
+  .fonti-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:8px}
+  .fonti-card{border:1px solid var(--line);border-left-width:4px;border-radius:12px;padding:12px 14px;background:var(--panel)}
+  .fonti-card .ft{font-weight:600;font-size:14px}
+  .src-book{border-left-color:var(--ok)}
+  .src-ai{border-left-color:var(--warn)}
+  .src-user{border-left-color:var(--accent)}
+  .fonti-table{display:flex;flex-direction:column;gap:8px}
+  .fonti-row{display:grid;grid-template-columns:180px 1fr;gap:12px;border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:#fff;align-items:start}
+  .fonti-row .fl{font-weight:600;font-size:14px}
+  .val-table{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+  .val-head,.val-row{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.1fr auto auto;gap:8px;align-items:center}
+  .val-head{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:0 8px}
+  .val-row{border:1px solid var(--line);border-radius:9px;padding:6px 9px;background:#fff}
+  .val-row.done{background:#f3f8ee;border-color:#cfe6bf}
+  .val-row .vn{display:flex;align-items:center;gap:7px;font-weight:500;font-size:13px}
+  .val-row select{padding:4px 6px;border:1px solid var(--line);border-radius:7px;font:inherit;font-size:12.5px;background:#fff;color:var(--ink);width:100%}
+  /* Mobile / responsive */
+  .menu-btn{display:none;border:1px solid var(--line);background:#fff;border-radius:9px;font-size:18px;line-height:1;padding:3px 10px;cursor:pointer;color:var(--ink)}
+  .side-bg{display:none;position:fixed;inset:0;background:rgba(40,30,20,.34);z-index:25}
+  @media (max-width:880px){
+    header{gap:10px;padding:10px 14px;flex-wrap:wrap}
+    header .attr{display:none}
+    header h1{font-size:20px}
+    .menu-btn{display:inline-block}
+    .nav{order:3;flex-basis:100%;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+    .navbtn{white-space:nowrap;padding:6px 12px;font-size:12.5px}
+    .app{grid-template-columns:1fr;height:auto}
+    .side{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:88vw;transform:translateX(-100%);transition:transform .25s ease;z-index:30;box-shadow:6px 0 26px rgba(60,40,20,.2)}
+    .side.open{transform:none}
+    .side-bg.open{display:block}
+    .main{padding:14px 14px 48px}
+    .bigwheel,.matrix-wheel,.wheel-svg{max-width:96vw}
+    .cards{grid-template-columns:1fr}
+    .drawer{width:min(440px,96vw)}
+    .fonti-row{grid-template-columns:1fr}
+    .wheels{gap:2px}
+    .wheel-arrow{display:none}
+    .val-head{display:none}
+    .val-row{grid-template-columns:1fr 1fr;gap:6px}
+    .val-row .vn{grid-column:1 / -1}
+  }
+  /* Ruota dei sapori (cascata) */
+  .ruota-intro h2{font-size:21px;margin-bottom:4px}
+  .ruota-intro p{max-width:680px;margin:0 0 14px}
+  .ruota-filters{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;align-items:flex-end}
+  .ruota-filters .ff{display:flex;flex-direction:column;gap:3px}
+  .ruota-filters label{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+  .ruota-filters select{padding:7px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font:inherit;font-size:13px}
+  .wheels{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start}
+  .wheel-col{display:flex;flex-direction:column;align-items:center;gap:5px;max-width:380px}
+  .wheel-col .wlevel{font-size:11.5px;color:var(--muted);font-weight:600;text-align:center}
+  .wheel-svg{width:360px;height:360px;max-width:46vw;overflow:visible}
+  .wheel-svg .wedge{stroke:#fffdf9;stroke-width:.6;transition:stroke .1s,opacity .1s;opacity:.92}
+  .wheel-svg g:hover .wedge{opacity:1;stroke:var(--ink);stroke-width:1.6}
+  .wheel-svg .wedge.sel{stroke:var(--ink);stroke-width:2.4;opacity:1}
+  .wheel-svg .wlabel{fill:var(--ink);font-family:system-ui;pointer-events:none}
+  .wheel-svg .wcenter{fill:var(--ink);font-weight:600;font-size:14px;font-family:Georgia,serif}
+  .wheel-arrow{align-self:center;font-size:24px;color:var(--accent);padding:150px 2px 0}
+  .ruota-result{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--panel);box-shadow:var(--shadow)}
+  .ruota-result .chainchips{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:6px 0 12px}
+  .ruota-result .arrow{color:var(--accent);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <button id="menuBtn" class="menu-btn" aria-label="Apri/chiudi pannello">☰</button>
+  <h1><span id="logo" class="logo"></span>FOOD<span style="color:var(--accent)">·</span>LAB</h1>
+  <nav id="nav" class="nav"></nav>
+  <span class="attr">Accostamenti dal libro di N. Segnit<br>piatti &amp; feste da fonti esterne (da validare)</span>
+</header>
+
+<div class="side-bg" id="sideBg"></div>
+<div class="app">
+  <aside class="side">
+    <div class="block">
+      <h3>Cerca ingrediente</h3>
+      <input id="search" class="search" placeholder="es. pomodoro, basilico…" autocomplete="off">
+    </div>
+    <div class="block">
+      <div class="row-between"><h3 style="margin:0">La tua selezione</h3><button id="clearSel" class="btn" style="padding:3px 8px;font-size:12px">pulisci</button></div>
+      <div id="selection" class="sel-wrap"><span class="muted" style="font-size:12.5px">Aggiungi ingredienti per trovare le combinazioni.</span></div>
+    </div>
+    <div class="block">
+      <h3>Filtra per famiglia</h3>
+      <div id="famFilter" class="chips"></div>
+    </div>
+    <div class="block">
+      <h3>Filtra per tipologia</h3>
+      <div id="typeFilter" class="chips"></div>
+    </div>
+    <div class="block">
+      <h3>Filtra per stagione <span class="muted" style="text-transform:none;font-weight:400">(Italia)</span></h3>
+      <div id="seasonFilter" class="chips"></div>
+    </div>
+    <div class="block">
+      <h3>Reperibilità <span class="basebar">— base: <b id="baseLabel"></b> <button id="editBase">cambia</button></span></h3>
+      <div id="locFilter" class="chips"></div>
+    </div>
+    <div class="block">
+      <h3>Le mie cose</h3>
+      <div class="mytools">
+        <button id="favBtn" class="btn" title="mostra solo i preferiti nell'elenco">★ Preferiti <span id="favCount" class="muted"></span></button>
+        <button id="savedBtn" class="btn" title="apri i piatti salvati">💾 Salvati <span id="savedCount" class="muted"></span></button>
+      </div>
+      <div class="mytools" style="margin-top:6px">
+        <button id="exportBtn" class="btn" title="scarica i tuoi dati (preferiti, piatti, metadati modificati)">Esporta</button>
+        <button id="importBtn" class="btn" title="ripristina i tuoi dati da un file">Importa</button>
+        <input id="importFile" type="file" accept="application/json" style="display:none">
+      </div>
+    </div>
+    <div class="block">
+      <h3>Ingredienti</h3>
+      <div id="ingList" class="ing-list"></div>
+      <div class="legend">Il colore indica la <b>famiglia di sapore</b>. Tipo, stagione, origine e <b>reperibilità</b> sono metadati esterni al libro: aprendo un ingrediente puoi <b>modificarli</b> (★ = preferito).</div>
+    </div>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<div class="drawer-bg" id="drawerBg"></div>
+<aside class="drawer" id="drawer">
+  <button class="close-x" id="closeDrawer">×</button>
+  <div id="drawerBody"></div>
+</aside>
+
+<script src="./data/data.js"></script>
+<script>
+(function(){
+  const D = window.FOODLAB_DATA;
+  const _main0=document.getElementById('main');
+  if(!D){_main0.innerHTML='<div class="empty"><div class="big">⚠️</div><h2>Impossibile caricare i dati</h2><p>Il file <code>data/data.js</code> non è stato caricato.</p></div>';return;}
+  function validateData(D){
+    const errs=[];
+    if(!D.book) errs.push('manca il layer "book"');
+    else ['families','ingredients','edges'].forEach(k=>{ if(!Array.isArray(D.book[k])||!D.book[k].length) errs.push('book.'+k+' mancante o vuoto'); });
+    if(D.book&&Array.isArray(D.book.ingredients)&&Array.isArray(D.book.edges)){
+      const ids=new Set(D.book.ingredients.map(i=>i.id));
+      const bad=D.book.edges.filter(e=>!ids.has(e.a)||!ids.has(e.b)).length;
+      if(bad) errs.push(bad+' archi puntano a ingredienti inesistenti');
+    }
+    if(!D.meta||!D.meta.ingredient_meta) errs.push('manca "meta.ingredient_meta"');
+    return errs;
+  }
+  const _errs=validateData(D);
+  if(_errs.length){_main0.innerHTML='<div class="empty"><div class="big">⚠️</div><h2>Dati non validi</h2><p style="text-align:left">'+_errs.map(e=>'• '+e).join('<br>')+'</p></div>';return;}
+
+  // ---- indici ----
+  const byId = new Map(D.book.ingredients.map(i=>[i.id,i]));
+  const famById = new Map(D.book.families.map(f=>[f.id,f]));
+  const famOrder = D.book.families.map(f=>f.id);
+  function metaOf(id){const b=(D.meta.ingredient_meta&&D.meta.ingredient_meta[id])||{};const ov=U.meta_overrides&&U.meta_overrides[id];return ov?Object.assign({},b,ov):b;}
+  const adj = new Map();
+  const edgeMap = new Map();
+  D.book.ingredients.forEach(i=>adj.set(i.id,new Set()));
+  D.book.edges.forEach(e=>{
+    adj.get(e.a) && adj.get(e.a).add(e.b);
+    adj.get(e.b) && adj.get(e.b).add(e.a);
+    edgeMap.set(e.a+'|'+e.b, e);
+  });
+  const edgeOf=(x,y)=>edgeMap.get([x,y].sort().join('|'));
+  const famColor=fid=>{const i=famOrder.indexOf(fid);return `hsl(${Math.round(i*360/famOrder.length)} 52% 52%)`;};
+  const famTint=fid=>{const i=famOrder.indexOf(fid);return `hsl(${Math.round(i*360/famOrder.length)} 52% 95%)`;};
+
+  // ---- indici layer esterno 'ext' (piatti + occasioni) ----
+  const EXT = D.ext || {dishes:[],occasions:[]};
+  const occById = new Map((EXT.occasions||[]).map(o=>[o.id,o]));
+  // dishById/dishesByIngredient/cuisineIngredients/CUISINES sono ricostruiti da rebuildExt()
+  // unendo i piatti del libro-esterno (baked) con quelli aggiunti dall'utente (localStorage).
+  let dishById=new Map(), dishesByIngredient=new Map(), cuisineIngredients=new Map(), CUISINES=[];
+  function allDishes(){
+    const baked=(EXT.dishes||[]).map(d=>(U.ext_validated&&U.ext_validated.includes(d.id))?Object.assign({},d,{_source:'user'}):d);
+    return baked.concat(U.ext_dishes||[]);
+  }
+  function rebuildExt(){
+    const ds=allDishes();
+    dishById=new Map(ds.map(d=>[d.id,d]));
+    dishesByIngredient=new Map(); cuisineIngredients=new Map();
+    ds.forEach(d=>{
+      (d.ingredients||[]).forEach(ing=>{ if(!dishesByIngredient.has(ing))dishesByIngredient.set(ing,[]); dishesByIngredient.get(ing).push(d.id); });
+      if(!cuisineIngredients.has(d.cuisine)) cuisineIngredients.set(d.cuisine,new Set());
+      (d.ingredients||[]).forEach(x=>cuisineIngredients.get(d.cuisine).add(x));
+    });
+    CUISINES=[...cuisineIngredients.keys()].sort();
+  }
+  const SEASONS=['primavera','estate','autunno','inverno'];
+  // mesi: dic-feb inverno · mar-mag primavera · giu-ago estate · set-nov autunno
+  function currentSeason(){const m=new Date().getMonth();return m<=1?'inverno':m<=4?'primavera':m<=7?'estate':m<=10?'autunno':'inverno';}
+  const FLAG={"Perù":"🇵🇪","Messico":"🇲🇽","Libano":"🇱🇧","Giappone":"🇯🇵","Thailandia":"🇹🇭","India":"🇮🇳","Spagna":"🇪🇸","Grecia":"🇬🇷","Francia":"🇫🇷","Italia":"🇮🇹","USA":"🇺🇸","Israele":"🇮🇱","Regno Unito":"🇬🇧","Vietnam":"🇻🇳","Corea":"🇰🇷","Marocco":"🇲🇦","Brasile":"🇧🇷","Turchia":"🇹🇷","Cina":"🇨🇳","Germania":"🇩🇪"};
+  const flagOf=c=>"";  // bandiere emoji non rese su Windows → si usa il badge cucina
+  const OCCE={cinco_de_mayo:"🌮",dia_de_muertos:"💀",natale:"🎄",pasqua:"🐣",thanksgiving:"🦃",diwali:"🪔",hanukkah:"🕎",capodanno_cinese:"🧧",ferragosto:"🏖️",eid:"🌙",san_valentino:"❤️",capodanno:"🎉",candelora:"🥞",oktoberfest:"🍺",carnevale:"🎭",halloween:"🎃",independencia_mexico:"🎆",la_tomatina:"🍅",holi:"🎨",songkran:"💦",midsummer:"🌞",hanami:"🌸"};
+  const occEmoji=id=>OCCE[id]||"🎉";
+  // (cuisineIngredients/CUISINES sono ricostruiti da rebuildExt, sopra)
+  // abbinamenti extra (oltre il libro) + vino
+  const EXTPAIR=EXT.pairings||[];
+  const extPairsByIng=new Map();
+  EXTPAIR.forEach(p=>[p.a,p.b].forEach(x=>{if(!extPairsByIng.has(x))extPairsByIng.set(x,[]);extPairsByIng.get(x).push(p);}));
+  const extPairKey=new Map(EXTPAIR.map(p=>[[p.a,p.b].sort().join('|'),p]));
+  const adjExtra=new Map(); D.book.ingredients.forEach(i=>adjExtra.set(i.id,new Set(adj.get(i.id))));
+  EXTPAIR.forEach(p=>{if(adjExtra.has(p.a)&&adjExtra.has(p.b)){adjExtra.get(p.a).add(p.b);adjExtra.get(p.b).add(p.a);}});
+  const EXTWINE=EXT.wine||{};
+  // fallback solo per tipologie dove l'indicazione è affidabile; frutta/verdura/erbe/spezie → vino solo se voce esplicita (evita consigli sbagliati tipo avocado→Moscato)
+  const TYPEWINE={carne:"Rosso strutturato",pesce:"Bianco secco",latticino:"Bianco / bollicine","frutta secca":"Passito / Vin santo"};
+  function wineFor(id){ if(EXTWINE[id]) return EXTWINE[id]; const w=TYPEWINE[metaOf(id).type]; return w?{wine:w,style:'indicazione generica per tipologia',note:''}:null; }
+  function pairKind(a,b){ const e=edgeOf(a,b); if(e) return e.kind; const p=extPairKey.get([a,b].sort().join('|')); return p?p.kind:null; }
+  function pairAdj(){ return (state.wheelF&&state.wheelF.extra)?adjExtra:adj; }
+  // ---- matrice dei sapori (profilo aromatico) ----
+  const MATRIX=D.matrix||{taxonomy:[],profiles:{}};
+  const MTAX=MATRIX.taxonomy||[];
+  const MPROF=MATRIX.profiles||{};
+  const MRULES=MATRIX.rules||null;
+  function jitter(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);} return 0.82+((h>>>0)%34)/100;}
+  // profilo aromatico calcolato LIVE dai metadati correnti (riflette gli edit utente); fallback ai profili "cotti"
+  function profileOf(id){
+    if(!MRULES) return MPROF[id]||{};
+    const ing=byId.get(id); if(!ing) return {};
+    const famName=((famById.get(ing.family)||{}).name||'').toLowerCase(), typ=metaOf(id).type||'';
+    const raw={}, add=(d,k)=>{ if(d) for(const c in d) raw[c]=(raw[c]||0)+k*d[c]; };
+    add(MRULES.type_w[typ],0.45); add(MRULES.fam_w[famName],0.55); add(MRULES.ovr[id],1.0);
+    const vals=Object.values(raw); if(!vals.length) return MPROF[id]||{};
+    const m=Math.max.apply(null,vals), out={};
+    for(const c in raw){ const v=Math.round(100*raw[c]/m); if(v>=8) out[c]=v; }
+    return out;
+  }
+
+  // ---- persistenza utente (localStorage; il layer book resta SEMPRE immutabile) ----
+  const LS_KEY='foodlab_user_v1';
+  const U=(function(){
+    const def={base:{city:'Messina',region:'Sicilia'},favorites:[],saved_combos:[],meta_overrides:{},ext_dishes:[],ext_validated:[]};
+    const base=Object.assign({},def,D.user||{});
+    let saved={}; try{saved=JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{};}catch(e){}
+    const u=Object.assign(base,saved);
+    u.base=u.base||def.base; u.favorites=u.favorites||[]; u.saved_combos=u.saved_combos||[]; u.meta_overrides=u.meta_overrides||{};
+    u.ext_dishes=u.ext_dishes||[]; u.ext_validated=u.ext_validated||[];
+    return u;
+  })();
+  function saveUser(){try{localStorage.setItem(LS_KEY,JSON.stringify({base:U.base,favorites:U.favorites,saved_combos:U.saved_combos,meta_overrides:U.meta_overrides,ext_dishes:U.ext_dishes,ext_validated:U.ext_validated}));}catch(e){}}
+  const isFav=id=>U.favorites.includes(id);
+  function toggleFav(id){const i=U.favorites.indexOf(id);i>=0?U.favorites.splice(i,1):U.favorites.push(id);saveUser();renderAll();}
+  function setMeta(id,field,value){
+    const cur=Object.assign({}, D.meta.ingredient_meta[id]||{}, U.meta_overrides[id]||{});
+    cur[field]=value; cur._source='user'; U.meta_overrides[id]=cur; saveUser();
+  }
+  function resetMeta(id){delete U.meta_overrides[id];saveUser();}
+  function saveCombo(){
+    if(state.sel.length<1) return;
+    const ids=state.sel.slice(), key=ids.slice().sort().join('|');
+    if(U.saved_combos.some(c=>(c.ids||[]).slice().sort().join('|')===key)) return;
+    U.saved_combos.unshift({ids}); saveUser(); renderAll();
+  }
+  function removeCombo(idx){U.saved_combos.splice(idx,1);saveUser();renderAll();openSaved();}
+  function editBase(){
+    const city=prompt('Città / luogo base:',U.base.city||''); if(city===null) return;
+    const region=prompt('Regione / area:',U.base.region||''); if(region===null) return;
+    U.base={city:city.trim(),region:region.trim()}; saveUser(); renderAll();
+  }
+  function exportData(){
+    const payload={_app:'FOOD_LAB',_v:1,base:U.base,favorites:U.favorites,saved_combos:U.saved_combos,meta_overrides:U.meta_overrides,ext_dishes:U.ext_dishes,ext_validated:U.ext_validated};
+    const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,1)],{type:'application/json'}));
+    const a=document.createElement('a'); a.href=url; a.download='foodlab-miei-dati.json'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+  }
+  function importData(file){
+    const r=new FileReader();
+    r.onload=()=>{try{const o=JSON.parse(r.result);
+      if(o.base) U.base=o.base;
+      if(Array.isArray(o.favorites)) U.favorites=o.favorites;
+      if(Array.isArray(o.saved_combos)) U.saved_combos=o.saved_combos;
+      if(o.meta_overrides&&typeof o.meta_overrides==='object') U.meta_overrides=o.meta_overrides;
+      if(Array.isArray(o.ext_dishes)) U.ext_dishes=o.ext_dishes;
+      if(Array.isArray(o.ext_validated)) U.ext_validated=o.ext_validated;
+      saveUser(); renderAll(); alert('Dati importati.');
+    }catch(e){alert('File non valido: '+e.message);}};
+    r.readAsText(file);
+  }
+
+  // ---- stato ----
+  const state={sel:[],query:'',resultQuery:'',fam:new Set(),type:new Set(),season:new Set(),loc:new Set(),favOnly:false,tab:'esplora',seasonView:null,occasionView:null,matrixIng:null,matrixEmph:null};
+
+  // ---- helpers DOM ----
+  function el(t,p,...kids){const n=document.createElement(t);if(p)for(const k in p){if(k==='class')n.className=p[k];else if(k==='html')n.innerHTML=p[k];else if(k.startsWith('on'))n.addEventListener(k.slice(2),p[k]);else n.setAttribute(k,p[k]);}kids.flat().forEach(c=>n.appendChild(typeof c==='string'?document.createTextNode(c):c));return n;}
+
+  // ---- filtri (insieme nodi ammessi) ----
+  function passes(id){
+    const ing=byId.get(id), m=metaOf(id);
+    if(state.fam.size && !state.fam.has(ing.family)) return false;
+    if(state.type.size && !state.type.has(m.type)) return false;
+    if(state.season.size){
+      const s=m.season||[];
+      const ok=s.includes("tutto l'anno") || s.some(x=>state.season.has(x));
+      if(!ok) return false;
+    }
+    if(state.loc.size && !state.loc.has(m.locality)) return false;
+    return true;
+  }
+
+  // ---- engine ----
+  function connectivity(y){return state.sel.reduce((n,x)=>n+(adj.get(x).has(y)?1:0),0);}
+  function candidates(){
+    const selSet=new Set(state.sel);
+    return D.book.ingredients.map(i=>i.id)
+      .filter(id=>!selSet.has(id) && passes(id))
+      .map(id=>({id,conn:connectivity(id)}))
+      .filter(o=>o.conn>0)
+      .sort((a,b)=> b.conn-a.conn || byId.get(b.id).degree-byId.get(a.id).degree);
+  }
+
+  // ---- engine: gruppi (clique) ----
+  function selectionIsClique(){
+    const S=state.sel;
+    for(let i=0;i<S.length;i++)for(let j=i+1;j<S.length;j++)
+      if(!adj.get(S[i]).has(S[j])) return false;
+    return true;
+  }
+  const sumDeg=g=>g.reduce((n,id)=>n+byId.get(id).degree,0);
+  // Bron–Kerbosch (pivot di Tomita) sui vicini comuni alla selezione → gruppi tutti-con-tutti, cap 6.
+  function workingGroups(){
+    const S=state.sel.slice();
+    if(S.length<1 || !selectionIsClique()) return [];
+    let C=D.book.ingredients.map(i=>i.id)
+        .filter(id=>!S.includes(id) && passes(id) && S.every(s=>adj.get(s).has(id)));
+    if(C.length>45) C=C.sort((a,b)=>byId.get(b).degree-byId.get(a).degree).slice(0,45);
+    const Cset=new Set(C);
+    const nbr=new Map(C.map(id=>[id,new Set([...adj.get(id)].filter(x=>Cset.has(x)))]));
+    const maxAdd=Math.max(1,6-S.length);
+    const cliques=[]; let guard=0;
+    function bk(R,P,X){
+      if(guard>5000) return;
+      if(!P.size && !X.size){ if(R.length) cliques.push(R.slice()); return; }
+      let piv=null,best=-1;
+      for(const u of [...P,...X]){const d=[...nbr.get(u)].filter(v=>P.has(v)).length;if(d>best){best=d;piv=u;}}
+      const pivN=piv?nbr.get(piv):new Set();
+      for(const v of [...P]){
+        if(pivN.has(v)) continue;
+        guard++;
+        const nv=nbr.get(v), R2=[...R,v];
+        if(R2.length>=maxAdd){ cliques.push(R2); P.delete(v); X.add(v); continue; }
+        bk(R2,new Set([...P].filter(x=>nv.has(x))),new Set([...X].filter(x=>nv.has(x))));
+        P.delete(v); X.add(v);
+      }
+    }
+    bk([],new Set(C),new Set());
+    let groups=cliques.map(K=>[...S,...K]).filter(g=>g.length>=3);
+    groups.sort((a,b)=>b.length-a.length);
+    const kept=[]; const keys=new Set();
+    for(const g of groups){
+      const k=g.slice().sort().join('|');
+      if(keys.has(k)) continue;
+      if(kept.some(u=>g.every(x=>u.includes(x)))) continue; // scarta sottoinsiemi di gruppi più ampi
+      keys.add(k); kept.push(g);
+    }
+    kept.sort((a,b)=> b.length-a.length || sumDeg(b)-sumDeg(a));
+    return kept.slice(0,12);
+  }
+  // preparazioni dalle coppie ENTRO la selezione (solo fatti del libro)
+  function selectionPreparations(){
+    const S=state.sel, out=new Map();
+    for(let i=0;i<S.length;i++)for(let j=i+1;j<S.length;j++){
+      const e=edgeOf(S[i],S[j]); if(!e||!e.preparations) continue;
+      e.preparations.forEach(p=>{
+        if(!out.has(p)) out.set(p,new Set());
+        out.get(p).add(byId.get(S[i]).name+' & '+byId.get(S[j]).name);
+      });
+    }
+    return [...out.entries()].map(([p,pairs])=>({p,pairs:[...pairs]}))
+      .sort((a,b)=>b.pairs.length-a.pairs.length || a.p.localeCompare(b.p));
+  }
+  function applyResultFilter(){
+    const inp=document.getElementById('resultSearch');
+    const q=(inp?inp.value:'').toLowerCase();
+    document.querySelectorAll('#main .card').forEach(c=>{ c.style.display=(c.dataset.name||'').includes(q)?'':'none'; });
+  }
+
+  // ---- helper note/drawer riusabili ----
+  const confLabel=c=>({high:'alta',medium:'media',thin:'incerta'}[c]||c);
+  function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawerBg').classList.add('open');}
+  function pairNoteEl(e){
+    const A=byId.get(e.a),B=byId.get(e.b);
+    const note=el('div',{class:'pair-note'});
+    note.appendChild(el('div',{class:'ph'},
+      el('span',{class:'fam-tag',style:`background:${famColor(A.family)}`}),
+      `${A.name} & ${B.name}`,
+      e.kind?el('span',{class:'badge '+e.kind,style:'margin-left:auto'},e.kind):''));
+    if(e.confidence) note.appendChild(el('div',{class:'conf conf-'+e.confidence,title:'Quanto è solido questo accostamento nelle fonti'},'affidabilità: '+confLabel(e.confidence)));
+    if(e.reason) note.appendChild(el('div',{class:'kv'},e.reason));
+    if(e.preparations&&e.preparations.length)
+      note.appendChild(el('div',{class:'kv'},el('b',{},'Preparazioni'),el('div',{},e.preparations.map(p=>el('span',{class:'pill'},p)))));
+    if(e.cuisines&&e.cuisines.length)
+      note.appendChild(el('div',{class:'kv'},el('b',{},'Cucine'),el('div',{},e.cuisines.map(p=>el('span',{class:'pill'},p)))));
+    note.appendChild(el('div',{class:'cite'},`La grammatica dei sapori — pag. ${e.page||'—'} · sintesi, non testo originale`));
+    return note;
+  }
+  function groupCard(group){
+    const names=group.map(id=>byId.get(id).name);
+    const c=el('div',{class:'card group-card','data-name':names.join(' ').toLowerCase(),onclick:()=>openGroupDetail(group)});
+    c.appendChild(el('div',{class:'top'},el('span',{class:'badge match'},`gruppo di ${group.length}`)));
+    const chips=el('div',{class:'gmembers'});
+    group.forEach(id=>{const ing=byId.get(id);
+      chips.appendChild(el('span',{class:'gchip'+(state.sel.includes(id)?' insel':'')},
+        el('span',{class:'fam-tag',style:`background:${famColor(ing.family)};width:8px;height:8px`}), ing.name));});
+    c.appendChild(chips);
+    c.appendChild(el('button',{class:'add',title:'usa questo gruppo come selezione',onclick:(ev)=>{ev.stopPropagation();state.sel=group.slice();state.resultQuery='';renderAll();}},'⤢'));
+    return c;
+  }
+  function openGroupDetail(group){
+    const body=document.getElementById('drawerBody');body.innerHTML='';
+    body.appendChild(el('h2',{style:'margin-bottom:2px'},`Gruppo di ${group.length}`));
+    body.appendChild(el('div',{class:'meta',style:'color:var(--muted);font-size:13px;margin-bottom:6px'},group.map(id=>byId.get(id).name).join(' · ')));
+    body.appendChild(el('button',{class:'btn',style:'margin:4px 0 6px',onclick:()=>{state.sel=group.slice();state.resultQuery='';closeDetail();renderAll();}},'Usa come selezione'));
+    const pairs=[];
+    for(let i=0;i<group.length;i++)for(let j=i+1;j<group.length;j++){const e=edgeOf(group[i],group[j]);if(e)pairs.push(e);}
+    body.appendChild(el('h3',{style:'margin:14px 0 4px;font-family:system-ui;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)'},`Perché funziona — ogni coppia (${pairs.length})`));
+    pairs.sort((a,b)=>(b.preparations?.length||0)-(a.preparations?.length||0)).forEach(e=>body.appendChild(pairNoteEl(e)));
+    openDrawer();
+  }
+
+  // ---- render sidebar ----
+  function renderFilters(){
+    const ff=document.getElementById('famFilter');ff.innerHTML='';
+    D.book.families.forEach(f=>{
+      ff.appendChild(el('button',{class:'chip'+(state.fam.has(f.id)?' on':''),onclick:()=>{tog(state.fam,f.id);renderAll();}},
+        el('span',{class:'dot',style:`background:${famColor(f.id)}`}), f.name));
+    });
+    const tf=document.getElementById('typeFilter');tf.innerHTML='';
+    D.meta.schema.type.forEach(t=>{
+      tf.appendChild(el('button',{class:'chip'+(state.type.has(t)?' on':''),onclick:()=>{tog(state.type,t);renderAll();}},t));
+    });
+    const sf=document.getElementById('seasonFilter');sf.innerHTML='';
+    ['primavera','estate','autunno','inverno'].forEach(s=>{
+      sf.appendChild(el('button',{class:'chip'+(state.season.has(s)?' on':''),onclick:()=>{tog(state.season,s);renderAll();}},s));
+    });
+    const lf=document.getElementById('locFilter');lf.innerHTML='';
+    (D.meta.schema.locality||[]).forEach(L=>{
+      lf.appendChild(el('button',{class:'chip'+(state.loc.has(L)?' on':''),onclick:()=>{tog(state.loc,L);renderAll();}},L));
+    });
+    document.getElementById('baseLabel').textContent=(U.base.city||'—')+(U.base.region?', '+U.base.region:'');
+    document.getElementById('favCount').textContent='('+U.favorites.length+')';
+    document.getElementById('savedCount').textContent='('+U.saved_combos.length+')';
+    document.getElementById('favBtn').classList.toggle('act',state.favOnly);
+  }
+  function tog(set,v){set.has(v)?set.delete(v):set.add(v);}
+
+  function renderIngList(){
+    const box=document.getElementById('ingList');box.innerHTML='';
+    const q=state.query.toLowerCase();
+    const selSet=new Set(state.sel);
+    const rows=D.book.ingredients
+      .filter(i=>i.name.toLowerCase().includes(q) && (!state.favOnly || isFav(i.id)) && passes(i.id))
+      .sort((a,b)=>a.name.localeCompare(b.name));
+    if(!rows.length) box.appendChild(el('div',{class:'muted',style:'padding:10px;font-size:12.5px'}, state.favOnly?'Nessun preferito (coi filtri attivi). Tocca ☆ per aggiungerne.':'Nessun ingrediente coi filtri attivi.'));
+    rows.forEach(i=>{
+      box.appendChild(el('div',{class:'ing'+(selSet.has(i.id)?' sel':''),tabindex:'0',role:'button','aria-pressed':String(selSet.has(i.id)),
+        onkeydown:(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleSel(i.id);}},onclick:()=>toggleSel(i.id)},
+        el('span',{class:'fam-tag',style:`background:${famColor(i.family)}`}),
+        el('span',{class:'nm'},i.name),
+        el('span',{class:'deg'},String(i.degree)),
+        el('span',{class:'idet',title:'dettaglio e modifica metadati',onclick:(ev)=>{ev.stopPropagation();openDetail(i.id);}}, '✎'),
+        el('span',{class:'istar'+(isFav(i.id)?' on':''),title:'preferito',onclick:(ev)=>{ev.stopPropagation();toggleFav(i.id);}}, isFav(i.id)?'★':'☆')
+      ));
+    });
+  }
+  function renderSelection(){
+    const box=document.getElementById('selection');box.innerHTML='';
+    if(!state.sel.length){box.appendChild(el('span',{class:'muted',style:'font-size:12.5px'},'Aggiungi ingredienti per trovare le combinazioni.'));return;}
+    state.sel.forEach(id=>{
+      box.appendChild(el('span',{class:'sel-chip'},
+        el('span',{class:'fam-tag',style:`background:${famColor(byId.get(id).family)};width:9px;height:9px`}),
+        byId.get(id).name,
+        el('button',{onclick:()=>toggleSel(id)},'×')));
+    });
+    box.appendChild(el('button',{class:'btn',style:'margin-top:8px;font-size:12px;padding:4px 10px',title:'salva questa selezione tra i piatti',onclick:saveCombo},'💾 salva piatto'));
+  }
+  function toggleSel(id){const i=state.sel.indexOf(id);i>=0?state.sel.splice(i,1):state.sel.push(id);state.resultQuery='';renderAll();}
+
+  // ---- la ruota come identità: logo + ruota-home ----
+  const SVGNS='http://www.w3.org/2000/svg';
+  const pol=(r,a)=>[r*Math.cos(a), r*Math.sin(a)];
+  function ringPath(r0,r1,a0,a1){const[x0,y0]=pol(r0,a0),[x1,y1]=pol(r1,a0),[x2,y2]=pol(r1,a1),[x3,y3]=pol(r0,a1);const lg=(a1-a0)>Math.PI?1:0;return `M${x0} ${y0} L${x1} ${y1} A${r1} ${r1} 0 ${lg} 1 ${x2} ${y2} L${x3} ${y3} A${r0} ${r0} 0 ${lg} 0 ${x0} ${y0} Z`;}
+  function miniWheel(){
+    const svg=document.createElementNS(SVGNS,'svg'); svg.setAttribute('viewBox','-16 -16 32 32');
+    const n=famOrder.length, step=2*Math.PI/n;
+    famOrder.forEach((fid,i)=>{const p=document.createElementNS(SVGNS,'path');
+      p.setAttribute('d',ringPath(4.5,15,-Math.PI/2+i*step,-Math.PI/2+(i+1)*step));
+      p.setAttribute('fill',famColor(fid)); p.setAttribute('stroke','#fffdf9'); p.setAttribute('stroke-width','.5'); svg.appendChild(p);});
+    return svg;
+  }
+  // grande ruota concentrica: anello famiglie + anello ingredienti; colore=compatibile/selezionato, bianco=escluso
+  function bigWheel(){
+    const sel=new Set(state.sel);
+    const compatible=id=>{ if(!passes(id)) return false; if(!state.sel.length||sel.has(id)) return true; return state.sel.every(s=>adj.get(s).has(id)); };
+    const ordered=[], spans=[];
+    famOrder.forEach(fid=>{ const items=D.book.ingredients.filter(i=>i.family===fid).sort((a,b)=>a.name.localeCompare(b.name));
+      if(items.length){ spans.push({fid,start:ordered.length,count:items.length}); items.forEach(i=>ordered.push(i.id)); } });
+    const N=ordered.length, step=2*Math.PI/N, half=240;
+    const R={fam0:34,fam1:74,ing0:78,ing1:150,lab:156,hub:30};
+    const svg=document.createElementNS(SVGNS,'svg'); svg.setAttribute('viewBox',`${-half} ${-half} ${2*half} ${2*half}`); svg.setAttribute('class','bigwheel');
+    // anello famiglie
+    spans.forEach(f=>{ const a0=-Math.PI/2+f.start*step, a1=-Math.PI/2+(f.start+f.count)*step, am=(a0+a1)/2;
+      const on=!state.fam.size||state.fam.has(f.fid);
+      const p=document.createElementNS(SVGNS,'path'); p.setAttribute('d',ringPath(R.fam0,R.fam1,a0,a1));
+      p.setAttribute('fill',on?famColor(f.fid):'#f4efe6'); p.setAttribute('class','fam-wedge'); p.style.cursor='pointer';
+      p.addEventListener('click',()=>{tog(state.fam,f.fid);renderAll();}); svg.appendChild(p);
+      const [lx,ly]=pol((R.fam0+R.fam1)/2,am), deg=am*180/Math.PI, left=Math.cos(am)<0;
+      const t=document.createElementNS(SVGNS,'text'); t.textContent=famById.get(f.fid).name; t.setAttribute('class','fam-label');
+      t.setAttribute('x',lx); t.setAttribute('y',ly); t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','middle');
+      t.setAttribute('transform',`rotate(${left?deg+180:deg} ${lx} ${ly})`); t.setAttribute('fill',on?'#fff':'#b8ab97');
+      t.addEventListener('click',()=>{tog(state.fam,f.fid);renderAll();}); svg.appendChild(t);
+    });
+    // anello ingredienti
+    const fs = N>50?7.5:10;
+    ordered.forEach((id,i)=>{ const ing=byId.get(id), a0=-Math.PI/2+i*step, a1=a0+step, am=a0+step/2;
+      const comp=compatible(id), picked=sel.has(id);
+      const p=document.createElementNS(SVGNS,'path'); p.setAttribute('d',ringPath(R.ing0,R.ing1,a0,a1));
+      p.setAttribute('fill', (picked||comp)?famColor(ing.family):'#ffffff');
+      p.setAttribute('class','ing-wedge'+(picked?' picked':'')+(comp?'':' off'));
+      const [lx,ly]=pol(R.lab,am), deg=am*180/Math.PI, left=Math.cos(am)<0;
+      const t=document.createElementNS(SVGNS,'text'); t.textContent=ing.name; t.setAttribute('class','ing-wlabel'+(comp||picked?'':' off')); t.setAttribute('font-size',fs);
+      t.setAttribute('x',lx); t.setAttribute('y',ly); t.setAttribute('text-anchor',left?'end':'start'); t.setAttribute('dominant-baseline','middle');
+      t.setAttribute('transform',`rotate(${left?deg+180:deg} ${lx} ${ly})`);
+      const g=document.createElementNS(SVGNS,'g'); g.style.cursor='pointer'; g.appendChild(p); g.appendChild(t);
+      g.addEventListener('click',()=>toggleSel(id));
+      g.addEventListener('mouseenter',()=>{center.textContent=ing.name;});
+      g.addEventListener('mouseleave',()=>{center.textContent=def();});
+      svg.appendChild(g);
+    });
+    const hub=document.createElementNS(SVGNS,'circle'); hub.setAttribute('r',R.hub); hub.setAttribute('class','wheel-hub');
+    hub.addEventListener('click',()=>{ if(state.sel.length){state.sel=[];state.resultQuery='';renderAll();} }); svg.appendChild(hub);
+    const center=document.createElementNS(SVGNS,'text'); center.setAttribute('class','wheel-center'); center.setAttribute('text-anchor','middle'); center.setAttribute('dominant-baseline','middle');
+    const def=()=> state.sel.length? (state.sel.length+(state.sel.length===1?' scelto':' scelti')) : 'FOOD·LAB';
+    center.textContent=def(); svg.appendChild(center);
+    return svg;
+  }
+
+  // ---- render main ----
+  function card(id,opts){
+    opts=opts||{};
+    const ing=byId.get(id),m=metaOf(id);
+    const c=el('div',{class:'card','data-name':ing.name.toLowerCase(),onclick:()=>openDetail(id)},
+      el('div',{class:'top'},
+        el('span',{class:'fam-tag',style:`background:${famColor(ing.family)};width:12px;height:12px`}),
+        el('span',{class:'name'},ing.name)),
+      el('div',{class:'meta'},
+        el('span',{class:'badge'},famById.get(ing.family).name),
+        m.type?el('span',{class:'badge'},m.type):'',
+        opts.matchBadge?el('span',{class:'badge match'},opts.matchBadge):''
+      )
+    );
+    c.appendChild(el('button',{class:'add',title:'aggiungi alla selezione',onclick:(ev)=>{ev.stopPropagation();toggleSel(id);}},'+'));
+    c.appendChild(el('button',{class:'star'+(isFav(id)?' on':''),title:'preferito',onclick:(ev)=>{ev.stopPropagation();toggleFav(id);}}, isFav(id)?'★':'☆'));
+    return c;
+  }
+
+  function renderEsplora(){
+    const main=document.getElementById('main');main.innerHTML='';
+    const wheelWrap=el('div',{class:'home-wheel'}); wheelWrap.appendChild(bigWheel()); main.appendChild(wheelWrap);
+    if(!state.sel.length){
+      main.appendChild(el('p',{class:'muted',style:'text-align:center;max-width:580px;margin:2px auto 0'},
+        'Tocca un ingrediente sulla ruota: i colori mostrano cosa puoi ancora abbinare, il bianco è escluso. Tocca una famiglia (anello interno) per filtrare; tocca il centro per azzerare.'));
+      return;
+    }
+    const cand=candidates();
+    main.appendChild(el('div',{class:'tree-bar'}, el('b',{},'Il tuo albero · '),
+      state.sel.map(id=>byId.get(id).name).join('  →  '),
+      el('span',{class:'muted'}, `   ·   ${cand.filter(c=>c.conn===state.sel.length).length} completano la selezione`)));
+    const n=state.sel.length;
+    const all=cand.filter(c=>c.conn===n);
+    const some=cand.filter(c=>c.conn<n);
+
+    main.appendChild(el('div',{class:'result-bar'},
+      el('input',{id:'resultSearch',class:'search',placeholder:'filtra i risultati…',autocomplete:'off',value:state.resultQuery||'',
+        oninput:(e)=>{state.resultQuery=e.target.value;applyResultFilter();}})));
+
+    const head=el('div',{class:'sec-title'},
+      el('h2',{}, n===1?`Si abbina con ${byId.get(state.sel[0]).name}`:'Completano tutta la selezione'),
+      el('span',{class:'count'},`${all.length} ingredienti`));
+    main.appendChild(head);
+    if(all.length){const g=el('div',{class:'cards'});all.forEach(c=>g.appendChild(card(c.id,{matchBadge:n>1?`abbina tutti (${n})`:null})));main.appendChild(g);}
+    else main.appendChild(el('p',{class:'muted'},'Nessun ingrediente si abbina con tutta la selezione. Guarda sotto le corrispondenze parziali.'));
+
+    if(n>1 && some.length){
+      main.appendChild(el('div',{class:'sec-title'},el('h2',{},'Corrispondenze parziali'),el('span',{class:'count'},`abbinano alcuni`)));
+      const g=el('div',{class:'cards'});some.slice(0,40).forEach(c=>g.appendChild(card(c.id,{matchBadge:`${c.conn}/${n}`})));main.appendChild(g);
+    }
+
+    // Gruppi che funzionano (clique)
+    main.appendChild(el('div',{class:'sec-title'},el('h2',{},'Gruppi che funzionano'),el('span',{class:'count'},'tutti si abbinano fra loro')));
+    if(!selectionIsClique()){
+      main.appendChild(el('p',{class:'muted'},'Gli ingredienti selezionati non si abbinano tutti fra loro: non formano un gruppo completo. Togli quello che stona (vedi le corrispondenze parziali).'));
+    } else {
+      const groups=workingGroups();
+      if(groups.length){const g=el('div',{class:'cards'});groups.forEach(gr=>g.appendChild(groupCard(gr)));main.appendChild(g);}
+      else main.appendChild(el('p',{class:'muted'},'Nessun gruppo più ampio che includa tutta la selezione.'));
+    }
+
+    // Preparazioni possibili dalla selezione (coppie interne)
+    if(n>1){
+      const preps=selectionPreparations();
+      if(preps.length){
+        main.appendChild(el('div',{class:'sec-title'},el('h2',{},'Preparazioni possibili'),el('span',{class:'count'},`${preps.length} dal libro`)));
+        const box=el('div',{class:'prep-box'});
+        preps.forEach(o=>box.appendChild(el('span',{class:'pill',title:o.pairs.join(' · ')},o.p)));
+        main.appendChild(box);
+      }
+    }
+
+    // Piatti che puoi fare con la selezione (layer esterno)
+    const dmatch=(EXT.dishes||[]).map(d=>({d,m:(d.ingredients||[]).filter(x=>state.sel.includes(x)).length}))
+      .filter(o=>o.m>=Math.min(2,n))
+      .sort((a,b)=> b.m-a.m || (b.m/b.d.ingredients.length)-(a.m/a.d.ingredients.length));
+    if(dmatch.length){
+      main.appendChild(el('div',{class:'sec-title'},el('h2',{},'Piatti che puoi fare'),el('span',{class:'count'},`${dmatch.length} idee · fonti esterne`)));
+      const dg=el('div',{class:'cards'});
+      dmatch.slice(0,12).forEach(o=>dg.appendChild(dishCard(o.d,{matchBadge:`${o.m}/${o.d.ingredients.length} ingred.`})));
+      main.appendChild(dg);
+    }
+    applyResultFilter();
+  }
+
+  // ---- dispatcher a schede ----
+  function renderNav(){
+    const nav=document.getElementById('nav');nav.innerHTML='';
+    [['esplora','🧪 Esplora'],['ruota','🎡 Ruota'],['matrice','🧬 Matrice'],['stagione','📅 Stagione'],['feste','🎉 Feste'],['fonti','ℹ️ Fonti']].forEach(([id,label])=>{
+      nav.appendChild(el('button',{class:'navbtn'+(state.tab===id?' on':''),onclick:()=>{state.tab=id;state.occasionView=null;closeSide();renderAll();}},label));
+    });
+  }
+  function renderMain(){
+    const main=document.getElementById('main');
+    if(renderMain._last!==state.tab){ main.classList.remove('fade'); void main.offsetWidth; main.classList.add('fade'); renderMain._last=state.tab; }
+    if(state.tab==='ruota') return renderRuota();
+    if(state.tab==='matrice') return renderMatrice();
+    if(state.tab==='stagione') return renderStagione();
+    if(state.tab==='feste') return renderFeste();
+    if(state.tab==='fonti') return renderFonti();
+    return renderEsplora();
+  }
+  function dishCard(dish,opts){
+    opts=opts||{};
+    const c=el('div',{class:'card dish-card',onclick:()=>openDishDetail(dish.id)},
+      el('div',{class:'top'}, el('span',{class:'flag'},flagOf(dish.country)), el('span',{class:'name'},dish.name)),
+      el('div',{class:'meta'},
+        el('span',{class:'badge cuisine'},dish.cuisine),
+        el('span',{class:'badge'},dish.category),
+        opts.matchBadge?el('span',{class:'badge match'},opts.matchBadge):''));
+    if(dish.note) c.appendChild(el('div',{class:'dish-note'},dish.note));
+    return c;
+  }
+  function renderStagione(){
+    const main=document.getElementById('main');main.innerHTML='';
+    const s=state.seasonView||currentSeason();
+    const lab={primavera:'Primavera 🌱',estate:'Estate ☀️',autunno:'Autunno 🍂',inverno:'Inverno ❄️'};
+    const hero=el('div',{class:'season-hero season-'+s});
+    hero.appendChild(el('div',{class:'season-now'}, s===currentSeason()?'siamo in stagione di':'stai esplorando'));
+    hero.appendChild(el('h2',{},lab[s]));
+    const sw=el('div',{class:'season-switch'});
+    SEASONS.forEach(x=>sw.appendChild(el('button',{class:'chip'+(x===s?' on':''),onclick:()=>{state.seasonView=x;renderMain();}},x)));
+    hero.appendChild(sw);
+    hero.appendChild(el('div',{class:'hint'},'Stagionalità ancorata all\'Italia · base '+(U.base.city||'—')+'.'));
+    main.appendChild(hero);
+    const ings=D.book.ingredients.filter(i=>(metaOf(i.id).season||[]).includes(s)).sort((a,b)=>a.name.localeCompare(b.name));
+    main.appendChild(el('div',{class:'sec-title'},el('h2',{},'Ingredienti di stagione'),el('span',{class:'count'},`${ings.length} ora`)));
+    if(ings.length){const g=el('div',{class:'cards'});ings.forEach(i=>g.appendChild(card(i.id)));main.appendChild(g);}
+    else main.appendChild(el('p',{class:'muted'},'Nessun ingrediente specificamente di questa stagione (molti sono disponibili tutto l\'anno).'));
+    const dishes=(EXT.dishes||[]).filter(d=>(d.seasons||[]).includes(s));
+    if(dishes.length){
+      main.appendChild(el('div',{class:'sec-title'},el('h2',{},'Piatti di stagione'),el('span',{class:'count'},`${dishes.length} · fonti esterne`)));
+      const dg=el('div',{class:'cards'});dishes.forEach(d=>dg.appendChild(dishCard(d)));main.appendChild(dg);
+    }
+  }
+  function renderFeste(){
+    const main=document.getElementById('main');main.innerHTML='';
+    if(state.occasionView){
+      const o=occById.get(state.occasionView);
+      main.appendChild(el('button',{class:'btn',style:'margin-bottom:12px',onclick:()=>{state.occasionView=null;renderMain();}},'← tutte le feste'));
+      main.appendChild(el('div',{class:'sec-title'},el('h2',{},occEmoji(o.id)+' '+o.name),el('span',{class:'count'},o.when+' · '+o.culture)));
+      if(o.note) main.appendChild(el('p',{class:'muted',style:'margin:-2px 0 10px'},o.note));
+      const dg=el('div',{class:'cards'});(o.dishes||[]).forEach(did=>{const d=dishById.get(did);if(d)dg.appendChild(dishCard(d));});main.appendChild(dg);
+      return;
+    }
+    main.appendChild(el('button',{class:'btn act',style:'margin-bottom:14px',onclick:openDishEditor},'➕ Aggiungi un piatto tuo'));
+    if((U.ext_dishes||[]).length){
+      main.appendChild(el('div',{class:'sec-title'},el('h2',{},'I tuoi piatti'),el('span',{class:'count'},`${U.ext_dishes.length} aggiunti`)));
+      const ug=el('div',{class:'cards'}); U.ext_dishes.forEach(d=>ug.appendChild(dishCard(d))); main.appendChild(ug);
+    }
+    main.appendChild(el('div',{class:'sec-title'},el('h2',{},'Feste & occasioni'),el('span',{class:'count'},`${(EXT.occasions||[]).length} nel mondo`)));
+    const g=el('div',{class:'cards'});
+    (EXT.occasions||[]).forEach(o=>{
+      g.appendChild(el('div',{class:'card occ-card',onclick:()=>{state.occasionView=o.id;renderMain();}},
+        el('div',{class:'occ-emoji'},occEmoji(o.id)),
+        el('div',{class:'name'},o.name),
+        el('div',{class:'meta'},el('span',{class:'badge'},o.when),el('span',{class:'badge'},o.culture)),
+        el('div',{class:'muted',style:'font-size:12px;margin-top:5px'},(o.dishes||[]).length===1?'1 piatto':`${(o.dishes||[]).length} piatti`)));
+    });
+    main.appendChild(g);
+  }
+  function openDishDetail(id){
+    const d=dishById.get(id); if(!d) return;
+    const body=document.getElementById('drawerBody');body.innerHTML='';
+    body.appendChild(el('div',{class:'top',style:'display:flex;align-items:center;gap:10px;margin-bottom:2px'},
+      el('span',{style:'font-size:24px'},flagOf(d.country)), el('h2',{},d.name)));
+    body.appendChild(el('div',{class:'meta',style:'color:var(--muted);font-size:13px;margin-bottom:6px'},`${d.cuisine} · ${d.country} · ${d.category}`));
+    body.appendChild(el('div',{class:'note-src'},'Piatto da conoscenza esterna al libro — '+(d._source==='user'?'validato':'da validare')+'.'));
+    if(d.note) body.appendChild(el('p',{style:'margin:10px 0;font-size:14px'},d.note));
+    if(d.source) body.appendChild(el('div',{class:'cite'},'Fonte: '+d.source));
+    body.appendChild(el('h3',{class:'drawer-h3'},'Ingredienti'));
+    const ic=el('div',{class:'chips'});
+    (d.ingredients||[]).forEach(iid=>{const ing=byId.get(iid);if(!ing)return;
+      ic.appendChild(el('button',{class:'chip',title:'apri ingrediente',onclick:()=>openDetail(iid)},
+        el('span',{class:'dot',style:`background:${famColor(ing.family)}`}),ing.name));});
+    (d.extra||[]).forEach(x=>ic.appendChild(el('span',{class:'chip',style:'opacity:.55'},x)));
+    body.appendChild(ic);
+    body.appendChild(el('button',{class:'btn act',style:'margin-top:12px',onclick:()=>{
+      (d.ingredients||[]).forEach(iid=>{if(!state.sel.includes(iid))state.sel.push(iid);});
+      state.tab='esplora';state.resultQuery='';closeDetail();renderAll();
+    }},'➕ Usa gli ingredienti nella selezione'));
+    if(isUserDish(d.id)){
+      body.appendChild(el('button',{class:'btn',style:'margin-top:8px',onclick:()=>{U.ext_dishes=U.ext_dishes.filter(x=>x.id!==d.id);saveUser();rebuildExt();closeDetail();renderAll();}},'🗑 Elimina questo piatto'));
+    } else {
+      const val=(U.ext_validated||[]).includes(d.id);
+      body.appendChild(el('button',{class:'btn'+(val?' act':''),style:'margin-top:8px',onclick:()=>{ if(val)U.ext_validated=U.ext_validated.filter(x=>x!==d.id); else U.ext_validated.push(d.id); saveUser();rebuildExt();openDishDetail(d.id);}}, val?'✓ validato (annulla)':'✓ Valida questo piatto'));
+    }
+    if(d.seasons&&d.seasons.length) body.appendChild(el('div',{class:'kv',style:'margin-top:12px'},el('b',{},'Stagione'),el('div',{},d.seasons.map(x=>el('span',{class:'pill'},x)))));
+    if(d.occasions&&d.occasions.length) body.appendChild(el('div',{class:'kv'},el('b',{},'Occasioni'),el('div',{},d.occasions.map(oid=>{const o=occById.get(oid);return el('span',{class:'pill',style:'cursor:pointer',onclick:()=>{state.tab='feste';state.occasionView=oid;closeDetail();renderAll();}},o?o.name:oid);}))));
+    openDrawer();
+  }
+
+  // ---- editor metadati (scrive solo nel layer utente, mai in book) ----
+  function refreshAfterMeta(id){renderFilters();renderIngList();renderMain();openDetail(id);}
+  function selField(label,options,current,onchange){
+    const sel=el('select',{onchange:(e)=>onchange(e.target.value)});
+    options.forEach(o=>sel.appendChild(el('option',{value:o},o)));
+    sel.value=current||'';
+    return el('div',{class:'efield'},el('label',{},label),sel);
+  }
+  function metaEditor(id){
+    const m=metaOf(id), src=m._source||'ai';
+    const wrap=el('div',{class:'editor'});
+    wrap.appendChild(el('h4',{},'Metadati — esterni al libro',
+      el('span',{class:'sbadge '+(src==='user'?'user':'ai'),style:'margin-left:8px'}, src==='user'?'validato da te':'da validare (AI)')));
+    wrap.appendChild(selField('Tipologia', D.meta.schema.type, m.type, v=>{setMeta(id,'type',v);refreshAfterMeta(id);}));
+    wrap.appendChild(selField('Reperibilità (base: '+(U.base.city||'—')+')', D.meta.schema.locality, m.locality, v=>{setMeta(id,'locality',v);refreshAfterMeta(id);}));
+    wrap.appendChild(selField('Origine geografica', D.meta.schema.origin, m.origin, v=>{setMeta(id,'origin',v);refreshAfterMeta(id);}));
+    const seas=el('div',{class:'chips'}), cur=new Set(m.season||[]);
+    ['primavera','estate','autunno','inverno',"tutto l'anno"].forEach(s=>{
+      seas.appendChild(el('button',{class:'chip'+(cur.has(s)?' on':''),onclick:()=>{
+        const set=new Set(metaOf(id).season||[]); set.has(s)?set.delete(s):set.add(s);
+        setMeta(id,'season',[...set]); refreshAfterMeta(id);
+      }},s));
+    });
+    wrap.appendChild(el('div',{class:'efield'},el('label',{},'Stagione (Italia)'),seas));
+    if(src==='user') wrap.appendChild(el('button',{class:'btn',style:'font-size:12px;margin-top:4px',onclick:()=>{resetMeta(id);refreshAfterMeta(id);}},'↺ ripristina valori AI'));
+    return wrap;
+  }
+  function openSaved(){
+    const body=document.getElementById('drawerBody');body.innerHTML='';
+    body.appendChild(el('h2',{style:'margin-bottom:2px'},'Piatti salvati'));
+    body.appendChild(el('div',{class:'meta',style:'color:var(--muted);font-size:13px;margin-bottom:8px'},U.saved_combos.length+' salvati'));
+    if(!U.saved_combos.length) body.appendChild(el('p',{class:'muted'},'Nessun piatto salvato. Componi una selezione e premi "💾 salva piatto".'));
+    U.saved_combos.forEach((c,idx)=>{
+      const ids=c.ids||[], card=el('div',{class:'combo-card'}), ch=el('div',{class:'gmembers'});
+      ids.forEach(id=>{const ing=byId.get(id); if(!ing) return;
+        ch.appendChild(el('span',{class:'gchip'},el('span',{class:'fam-tag',style:`background:${famColor(ing.family)};width:8px;height:8px`}),ing.name));});
+      card.appendChild(ch);
+      card.appendChild(el('div',{class:'actions'},
+        el('button',{class:'btn',onclick:()=>{state.sel=ids.slice();state.resultQuery='';closeDetail();renderAll();}},'Carica'),
+        el('button',{class:'btn',onclick:()=>removeCombo(idx)},'Elimina')));
+      body.appendChild(card);
+    });
+    openDrawer();
+  }
+
+  // ---- editor piatti (layer utente) ----
+  function slug(s){return (s||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'piatto';}
+  function isUserDish(id){return (U.ext_dishes||[]).some(d=>d.id===id);}
+  function openDishEditor(){
+    const body=document.getElementById('drawerBody');body.innerHTML='';
+    const draft={ingredients:new Set(),seasons:new Set(),occasions:new Set()};
+    body.appendChild(el('h2',{},'➕ Nuovo piatto'));
+    body.appendChild(el('p',{class:'muted',style:'font-size:12.5px;margin:4px 0 10px'},'Resta salvato nel tuo browser (layer utente) e compare in Esplora, Stagione, Feste e nella Ruota.'));
+    const nameI=el('input',{class:'search',placeholder:'Nome (es. Pasta al pesto di pistacchio)'});
+    const cuisineI=el('input',{class:'search',placeholder:'Cucina (es. Siciliana)'});
+    const countryI=el('input',{class:'search',placeholder:'Paese (es. Italia)'});
+    const catSel=el('select',{}); ['antipasto','primo','secondo','contorno','zuppa','insalata','salsa','dolce','street food'].forEach(c=>catSel.appendChild(el('option',{value:c},c)));
+    const noteI=el('textarea',{class:'search',rows:'2',placeholder:'Nota (facoltativa)'});
+    const extraI=el('input',{class:'search',placeholder:'Ingredienti extra non in elenco (separati da virgola)'});
+    const fonteI=el('input',{class:'search',placeholder:'Fonte / citazione (facoltativa): es. tradizione di famiglia, libro, sito'});
+    const fld=(lab,node)=>el('div',{class:'efield'},el('label',{},lab),node);
+    body.appendChild(fld('Nome',nameI)); body.appendChild(fld('Cucina',cuisineI)); body.appendChild(fld('Paese',countryI)); body.appendChild(fld('Categoria',catSel));
+    // ingredienti
+    const picked=el('div',{class:'chips',style:'margin-bottom:4px'});
+    const refreshPicked=()=>{picked.innerHTML=''; [...draft.ingredients].forEach(iid=>{const ing=byId.get(iid);
+      picked.appendChild(el('span',{class:'gchip'},el('span',{class:'fam-tag',style:`background:${famColor(ing.family)};width:8px;height:8px`}),ing.name,
+        el('button',{style:'background:none;border:none;cursor:pointer;color:var(--muted)',onclick:()=>{draft.ingredients.delete(iid);refreshPicked();refreshRes();}},'×')));});};
+    const ingSearch=el('input',{class:'search',placeholder:'cerca un ingrediente da aggiungere…'});
+    const ingRes=el('div',{class:'ing-list',style:'max-height:150px;margin-top:5px'});
+    const refreshRes=()=>{const q=ingSearch.value.toLowerCase();ingRes.innerHTML='';
+      D.book.ingredients.filter(i=>i.name.toLowerCase().includes(q)&&!draft.ingredients.has(i.id)).slice(0,40).forEach(i=>{
+        ingRes.appendChild(el('div',{class:'ing',onclick:()=>{draft.ingredients.add(i.id);ingSearch.value='';refreshPicked();refreshRes();}},
+          el('span',{class:'fam-tag',style:`background:${famColor(i.family)}`}),el('span',{class:'nm'},i.name)));});};
+    ingSearch.addEventListener('input',refreshRes); refreshRes();
+    body.appendChild(fld('Ingredienti (dai 99 del libro)',el('div',{},picked,ingSearch,ingRes)));
+    // stagioni
+    const seasRow=el('div',{class:'chips'}); ['primavera','estate','autunno','inverno'].forEach(s=>{
+      const b=el('button',{class:'chip',onclick:()=>{draft.seasons.has(s)?draft.seasons.delete(s):draft.seasons.add(s);b.classList.toggle('on');}},s); seasRow.appendChild(b);});
+    body.appendChild(fld('Stagione',seasRow));
+    // occasioni
+    const occRow=el('div',{class:'chips'}); (EXT.occasions||[]).forEach(o=>{
+      const b=el('button',{class:'chip',onclick:()=>{draft.occasions.has(o.id)?draft.occasions.delete(o.id):draft.occasions.add(o.id);b.classList.toggle('on');}},occEmoji(o.id)+' '+o.name); occRow.appendChild(b);});
+    body.appendChild(fld('Occasioni',occRow));
+    body.appendChild(fld('Nota',noteI)); body.appendChild(fld('Extra',extraI)); body.appendChild(fld('Fonte',fonteI));
+    body.appendChild(el('button',{class:'btn act',style:'margin-top:6px',onclick:()=>{
+      if(!nameI.value.trim()){alert('Dai un nome al piatto.');return;}
+      if(!draft.ingredients.size){alert('Aggiungi almeno un ingrediente.');return;}
+      let did=slug(nameI.value)+'_u',k=1; while(dishById.has(did)){did=slug(nameI.value)+'_u'+(++k);}
+      const dish={id:did,name:nameI.value.trim(),cuisine:cuisineI.value.trim()||'Mia cucina',country:countryI.value.trim()||'—',category:catSel.value,
+        ingredients:[...draft.ingredients],extra:extraI.value.split(',').map(s=>s.trim()).filter(Boolean),
+        seasons:[...draft.seasons],occasions:[...draft.occasions],note:noteI.value.trim(),source:fonteI.value.trim(),_source:'user'};
+      U.ext_dishes.push(dish); saveUser(); rebuildExt(); closeDetail(); renderAll();
+    }},'Salva piatto'));
+    openDrawer();
+  }
+
+  // ---- matrice dei sapori: sunburst a raggi variabili ----
+  function matrixSunburst(id){
+    const prof=profileOf(id), emph=state.matrixEmph||new Set();
+    const layout=MTAX.map(cat=>{ let aw=0.5+(prof[cat.id]||0)/100; if(emph.size) aw*=emph.has(cat.id)?1.9:0.5; return {cat,aw,val:prof[cat.id]||0}; });
+    const tot=layout.reduce((s,l)=>s+l.aw,0)||1;
+    const half=252, Rb0=54, Rb1=70, R0=72, Rmax=176, gap=0.004;
+    const svg=document.createElementNS(SVGNS,'svg'); svg.setAttribute('viewBox',`${-half} ${-half} ${2*half} ${2*half}`); svg.setAttribute('class','bigwheel matrix-wheel');
+    let center, cname=byId.get(id)?byId.get(id).name:id;
+    let a=-Math.PI/2;
+    layout.forEach(({cat,aw,val})=>{
+      const span=2*Math.PI*aw/tot, a0=a, a1=a+span, am=(a0+a1)/2; a=a1;
+      const active=val>=8;
+      const band=document.createElementNS(SVGNS,'path'); band.setAttribute('d',ringPath(Rb0,Rb1,a0+gap,a1-gap));
+      band.setAttribute('fill',active?cat.color:'#efe9dd'); band.setAttribute('class','mx-band');
+      band.addEventListener('click',()=>{tog(state.matrixEmph,cat.id);renderMatrice();}); svg.appendChild(band);
+      if(span>0.13){ const [lx,ly]=pol((Rb0+Rb1)/2,am),deg=am*180/Math.PI,left=Math.cos(am)<0;
+        const t=document.createElementNS(SVGNS,'text'); t.textContent=cat.name; t.setAttribute('class','mx-cat-label');
+        t.setAttribute('x',lx);t.setAttribute('y',ly);t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');
+        t.setAttribute('transform',`rotate(${left?deg+180:deg} ${lx} ${ly})`); t.setAttribute('fill',active?'#fff':'#b8ab97'); svg.appendChild(t); }
+      const ds=cat.descriptors||[], dstep=span/(ds.length||1);
+      ds.forEach((d,di)=>{ const b0=a0+di*dstep, b1=b0+dstep;
+        let L=(val/100)*d.w*jitter(id+cat.id+d.name); if(emph.size) L*=emph.has(cat.id)?1.25:0.75; L=Math.max(0,Math.min(1.2,L));
+        const r1=R0+(active? 8+L*(Rmax-R0-8) : 6);
+        const p=document.createElementNS(SVGNS,'path'); p.setAttribute('d',ringPath(R0,r1,b0+gap,b1-gap));
+        p.setAttribute('fill',active?cat.color:'#ece5d8'); p.setAttribute('class','mx-bar-wedge'); if(active) p.setAttribute('fill-opacity',(0.5+0.5*val/100).toFixed(2));
+        const g=document.createElementNS(SVGNS,'g'); g.appendChild(p);
+        g.addEventListener('mouseenter',()=>{if(center)center.textContent=d.name;});
+        g.addEventListener('mouseleave',()=>{if(center)center.textContent=cname;});
+        svg.appendChild(g);
+      });
+    });
+    const hub=document.createElementNS(SVGNS,'circle'); hub.setAttribute('r',Rb0-1); hub.setAttribute('class','wheel-hub'); svg.appendChild(hub);
+    center=document.createElementNS(SVGNS,'text'); center.setAttribute('class','wheel-center'); center.setAttribute('text-anchor','middle'); center.setAttribute('dominant-baseline','middle');
+    center.textContent=cname; svg.appendChild(center);
+    return svg;
+  }
+  function renderMatrice(){
+    const main=document.getElementById('main');main.innerHTML='';
+    if(!state.matrixEmph) state.matrixEmph=new Set();
+    if(!state.matrixIng || !byId.get(state.matrixIng)) state.matrixIng=(state.sel.find(s=>byId.get(s)))||(byId.get('pomodoro')?'pomodoro':D.book.ingredients[0].id);
+    main.appendChild(el('div',{class:'ruota-intro'}, el('h2',{},'🧬 La matrice dei sapori'),
+      el('p',{class:'muted'},'Profilo aromatico dell\'ingrediente: ogni raggio è un descrittore e la sua lunghezza è l\'affinità; le famiglie aromatiche più presenti occupano più spazio. Valori = base AI derivata dai metadati (modificabile, da validare). Tocca una famiglia (banda o chip) per enfatizzarla: cambiano lunghezze e grandezze.')));
+    const sel=el('select',{class:'mx-select',onchange:e=>{state.matrixIng=e.target.value;renderMatrice();}});
+    D.book.ingredients.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(i=>sel.appendChild(el('option',{value:i.id},i.name)));
+    sel.value=state.matrixIng;
+    const bar=el('div',{class:'mx-bar'}, el('div',{class:'ff'},el('label',{},'Ingrediente'),sel),
+      el('div',{class:'ff'},el('label',{},' '),el('button',{class:'btn',onclick:()=>{if(!state.sel.includes(state.matrixIng)){state.sel.push(state.matrixIng);state.resultQuery='';}state.tab='esplora';renderAll();}},'➕ aggiungi alla selezione')));
+    if(state.matrixEmph.size) bar.appendChild(el('div',{class:'ff'},el('label',{},' '),el('button',{class:'btn',onclick:()=>{state.matrixEmph=new Set();renderMatrice();}},'↺ azzera enfasi')));
+    main.appendChild(bar);
+    const wrap=el('div',{class:'home-wheel'}); wrap.appendChild(matrixSunburst(state.matrixIng)); main.appendChild(wrap);
+    const prof=profileOf(state.matrixIng), top=Object.entries(prof).sort((a,b)=>b[1]-a[1]);
+    const leg=el('div',{class:'mx-legend'});
+    top.forEach(([cid,v])=>{const cat=MTAX.find(x=>x.id===cid); if(!cat)return;
+      leg.appendChild(el('span',{class:'mx-chip'+(state.matrixEmph.has(cid)?' on':''),onclick:()=>{tog(state.matrixEmph,cid);renderMatrice();}},
+        el('span',{style:`background:${cat.color};width:9px;height:9px;border-radius:50%;display:inline-block`}), `${cat.name} · ${v}`));});
+    main.appendChild(leg);
+    // affini per profilo aromatico (principio della matrice: condividere composti)
+    const selfSum=Object.values(prof).reduce((a,b)=>a+b,0)||1;
+    const aff=D.book.ingredients.map(i=>i.id).filter(x=>x!==state.matrixIng)
+      .map(x=>{const pb=profileOf(x); let s=0; for(const c in prof){ if(pb[c]) s+=Math.min(prof[c],pb[c]); } return {x,s};})
+      .filter(o=>o.s>0).sort((a,b)=>b.s-a.s).slice(0,12);
+    if(aff.length){
+      main.appendChild(el('div',{class:'sec-title'},el('h2',{},'Affini per profilo aromatico'),el('span',{class:'count'},'stima AI, non dal libro')));
+      main.appendChild(el('p',{class:'muted',style:'margin:-4px 0 8px;font-size:12.5px'},'⚠️ Spunto basato sui profili aromatici stimati: utile per esplorare, ma NON sostituisce gli accostamenti verificati del libro. Da validare in cucina.'));
+      const g=el('div',{class:'cards'}); aff.forEach(o=>g.appendChild(card(o.x,{matchBadge:'affinità ~'+Math.round(100*o.s/selfSum)+'%'}))); main.appendChild(g);
+    }
+  }
+
+  // ---- ruota dei sapori (cascata) ----
+  function wheelNodePasses(id){
+    const f=state.wheelF, m=metaOf(id);
+    if(f.season){ const s=m.season||[]; if(!s.includes(f.season) && !s.includes("tutto l'anno")) return false; }
+    if(f.cuisine){ const set=cuisineIngredients.get(f.cuisine); if(!set || !set.has(id)) return false; }
+    return true;
+  }
+  function wheelCandidates(prefix){
+    const A=pairAdj();
+    let cand=D.book.ingredients.map(i=>i.id).filter(id=>!prefix.includes(id));
+    if(prefix.length) cand=cand.filter(id=>prefix.every(c=>A.get(c).has(id)));   // vicino comune a tutta la catena = clique
+    cand=cand.filter(wheelNodePasses);
+    if(prefix.length && state.wheelF.taste){ const last=prefix[prefix.length-1];
+      cand=cand.filter(id=>pairKind(last,id)===state.wheelF.taste); }
+    return cand;
+  }
+  function wheelSVG(ids,opts){
+    opts=opts||{};
+    const NS='http://www.w3.org/2000/svg';
+    const ordered=[];
+    famOrder.forEach(fid=>D.book.ingredients
+      .filter(i=>i.family===fid && ids.includes(i.id))
+      .sort((a,b)=>a.name.localeCompare(b.name)).forEach(i=>ordered.push(i.id)));
+    ids.forEach(id=>{if(!ordered.includes(id))ordered.push(id);});
+    const N=ordered.length||1, R0=30, R1=125, RL=R1+7, half=262;
+    const fs = N>50?8 : N>24?10 : N>12?12 : 14;
+    const svg=document.createElementNS(NS,'svg');
+    svg.setAttribute('viewBox',`${-half} ${-half} ${2*half} ${2*half}`);
+    svg.setAttribute('class','wheel-svg');
+    const step=2*Math.PI/N, P=(r,a)=>[r*Math.cos(a), r*Math.sin(a)];
+    ordered.forEach((id,i)=>{
+      const ing=byId.get(id);
+      const a0=-Math.PI/2+i*step, a1=a0+step, am=a0+step/2;
+      const [x0,y0]=P(R0,a0),[x1,y1]=P(R1,a0),[x2,y2]=P(R1,a1),[x3,y3]=P(R0,a1);
+      const path=document.createElementNS(NS,'path');
+      path.setAttribute('d',`M${x0} ${y0} L${x1} ${y1} A${R1} ${R1} 0 0 1 ${x2} ${y2} L${x3} ${y3} A${R0} ${R0} 0 0 0 ${x0} ${y0} Z`);
+      path.setAttribute('fill',famColor(ing.family));
+      path.setAttribute('class','wedge'+(opts.selected===id?' sel':''));
+      const t=document.createElementNS(NS,'text');
+      t.textContent=ing.name; t.setAttribute('class','wlabel'); t.setAttribute('font-size',fs);
+      const [lx,ly]=P(RL,am); t.setAttribute('x',lx); t.setAttribute('y',ly);
+      const deg=am*180/Math.PI, left=Math.cos(am)<0;
+      t.setAttribute('text-anchor',left?'end':'start');
+      t.setAttribute('transform',`rotate(${left?deg+180:deg} ${lx} ${ly})`);
+      t.setAttribute('dominant-baseline','middle');
+      const g=document.createElementNS(NS,'g'); g.style.cursor='pointer';
+      g.appendChild(path); g.appendChild(t);
+      g.addEventListener('click',()=>opts.onPick&&opts.onPick(id));
+      g.addEventListener('mouseenter',()=>opts.onHover&&opts.onHover(id));
+      g.addEventListener('mouseleave',()=>opts.onHover&&opts.onHover(null));
+      svg.appendChild(g);
+    });
+    const c=document.createElementNS(NS,'text'); c.setAttribute('class','wcenter');
+    c.setAttribute('text-anchor','middle'); c.setAttribute('dominant-baseline','middle');
+    c.textContent=opts.center||''; svg.appendChild(c); svg._center=c;
+    return svg;
+  }
+  function renderRuota(){
+    const main=document.getElementById('main');main.innerHTML='';
+    if(!state.wheelF) state.wheelF={season:'',cuisine:'',taste:''};
+    if(!state.wheelChain) state.wheelChain=[];
+    const chain=state.wheelChain;
+    main.appendChild(el('div',{class:'ruota-intro'},
+      el('h2',{},'🎡 La ruota dei sapori'),
+      el('p',{class:'muted'},'Parti da un ingrediente: a ogni passo la ruota successiva mostra solo ciò che si abbina con tutte le tue scelte. Restringi il cerchio per stagione, cucina e tipo di abbinamento, fino a comporre 3–4 ingredienti che funzionano insieme.')));
+    const fb=el('div',{class:'ruota-filters'});
+    const mkSel=(label,val,options,on)=>{
+      const s=el('select',{onchange:e=>on(e.target.value)});
+      options.forEach(([v,t])=>s.appendChild(el('option',{value:v},t)));
+      s.value=val; return el('div',{class:'ff'},el('label',{},label),s);
+    };
+    fb.appendChild(mkSel('Stagione',state.wheelF.season,[['','Qualsiasi'],['primavera','Primavera'],['estate','Estate'],['autunno','Autunno'],['inverno','Inverno']],v=>{state.wheelF.season=v;renderRuota();}));
+    fb.appendChild(mkSel('Cucina',state.wheelF.cuisine,[['','Qualsiasi']].concat(CUISINES.map(c=>[c,c])),v=>{state.wheelF.cuisine=v;renderRuota();}));
+    fb.appendChild(mkSel('Tipo abbinamento',state.wheelF.taste,[['','Qualsiasi'],['classico','Classico'],['insolito','Insolito'],['neutro','Neutro']],v=>{state.wheelF.taste=v;renderRuota();}));
+    fb.appendChild(el('div',{class:'ff'},el('label',{},'Fonti'),
+      el('button',{class:'btn'+(state.wheelF.extra?' act':''),title:'includi abbinamenti oltre il libro (fonti esterne)',onclick:()=>{state.wheelF.extra=!state.wheelF.extra;renderRuota();}}, state.wheelF.extra?'✓ extra inclusi':'+ oltre il libro')));
+    if(chain.length) fb.appendChild(el('div',{class:'ff'},el('label',{},' '),el('button',{class:'btn',onclick:()=>{state.wheelChain=[];renderRuota();}},'↺ ricomincia')));
+    main.appendChild(fb);
+
+    const nWheels=Math.min(chain.length+1,4);
+    const wheels=el('div',{class:'wheels'});
+    for(let L=0;L<nWheels;L++){
+      const prefix=chain.slice(0,L);
+      let ids=wheelCandidates(prefix);
+      const sel=chain[L]||null;
+      if(sel && !ids.includes(sel)) ids=[sel].concat(ids);
+      const col=el('div',{class:'wheel-col'});
+      col.appendChild(el('div',{class:'wlevel'}, L===0?'1 · scegli l\'ingrediente':`${L+1} · si abbina con ${byId.get(chain[L-1]).name}`));
+      if(!ids.length){
+        col.appendChild(el('p',{class:'muted',style:'max-width:220px;text-align:center;padding:30px 0'},'Nessun ingrediente con questi filtri: allarga i filtri o cambia la scelta precedente.'));
+      } else {
+        const fallback=sel?byId.get(sel).name:(L===0?'scegli':'…');
+        const svg=wheelSVG(ids,{selected:sel,center:fallback,
+          onPick:(id)=>{ state.wheelChain=chain.slice(0,L).concat([id]); renderRuota(); },
+          onHover:(id)=>{ svg._center.textContent = id?byId.get(id).name:fallback; }});
+        col.appendChild(svg);
+        col.appendChild(el('div',{class:'muted',style:'font-size:11px'},`${ids.length} opzioni`));
+      }
+      wheels.appendChild(col);
+      if(L<nWheels-1) wheels.appendChild(el('div',{class:'wheel-arrow'},'→'));
+    }
+    main.appendChild(wheels);
+
+    if(chain.length>=2){
+      const res=el('div',{class:'ruota-result'});
+      res.appendChild(el('h3',{class:'drawer-h3',style:'margin-top:0'},'La tua combinazione — tutti si abbinano fra loro'));
+      const cc=el('div',{class:'chainchips'});
+      chain.forEach((id,i)=>{ if(i)cc.appendChild(el('span',{class:'arrow'},'+'));
+        const ing=byId.get(id);
+        cc.appendChild(el('span',{class:'gchip'},el('span',{class:'fam-tag',style:`background:${famColor(ing.family)};width:8px;height:8px`}),ing.name)); });
+      res.appendChild(cc);
+      res.appendChild(el('button',{class:'btn act',onclick:()=>{state.sel=chain.slice();state.tab='esplora';state.resultQuery='';renderAll();}},'➕ Apri questa combinazione nel motore'));
+      main.appendChild(res);
+    }
+  }
+
+  // ---- Fonti & metodo (trasparenza sulle origini del dato) ----
+  function srcCard(kind,title,desc){
+    return el('div',{class:'fonti-card src-'+kind}, el('div',{class:'ft'},title), el('div',{class:'muted',style:'font-size:12.5px;margin-top:4px;line-height:1.45'},desc));
+  }
+  function validateMeta(id){ const cur=Object.assign({}, D.meta.ingredient_meta[id]||{}, U.meta_overrides[id]||{}); cur._source='user'; U.meta_overrides[id]=cur; saveUser(); }
+  function applyValidaFilter(){ const i=document.getElementById('valSearch'); const q=(i?i.value:'').toLowerCase(); document.querySelectorAll('.val-table .val-row').forEach(r=>{ r.style.display=(r.dataset.name||'').includes(q)?'':'none'; }); }
+  function validaRow(ing){
+    const m=metaOf(ing.id), src=m._source||'ai';
+    const typeSel=el('select',{onchange:e=>{setMeta(ing.id,'type',e.target.value);renderFonti();}});
+    D.meta.schema.type.forEach(t=>typeSel.appendChild(el('option',{value:t},t))); typeSel.value=m.type||'';
+    const locSel=el('select',{onchange:e=>{setMeta(ing.id,'locality',e.target.value);renderFonti();}});
+    (D.meta.schema.locality||[]).forEach(L=>locSel.appendChild(el('option',{value:L},L))); locSel.value=m.locality||'';
+    return el('div',{class:'val-row'+(src==='user'?' done':''),'data-name':ing.name.toLowerCase()},
+      el('div',{class:'vn'},el('span',{class:'fam-tag',style:`background:${famColor(ing.family)}`}),ing.name),
+      typeSel, locSel,
+      el('div',{class:'muted',style:'font-size:11.5px'},(m.season||[]).join(', ')||'—'),
+      el('span',{class:'sbadge '+(src==='user'?'user':'ai')},src==='user'?'validato':'da validare'),
+      el('button',{class:'btn',style:'font-size:12px;padding:3px 9px',title:'conferma i valori come tuoi',onclick:()=>{ if(src==='user'){delete U.meta_overrides[ing.id];saveUser();} else validateMeta(ing.id); renderFonti(); }}, src==='user'?'↺':'✓'));
+  }
+  function renderFonti(){
+    const main=document.getElementById('main');main.innerHTML='';
+    const E=D.book.edges, high=E.filter(e=>e.confidence==='high').length, med=E.filter(e=>e.confidence==='medium').length, thin=E.filter(e=>e.confidence==='thin').length;
+    const userMeta=Object.keys(U.meta_overrides||{}).length, userDishes=(U.ext_dishes||[]).length, validated=(U.ext_validated||[]).length;
+    main.appendChild(el('div',{class:'ruota-intro'},el('h2',{},'ℹ️ Fonti & metodo'),
+      el('p',{class:'muted'},'Trasparenza totale: da dove viene ogni dato e quanto è affidabile. Il principio del progetto è separare ciò che è verificato dal libro, da ciò che è una stima AI ancora da validare, da ciò che hai inserito tu.')));
+    const leg=el('div',{class:'fonti-cards'});
+    leg.appendChild(srcCard('book','✓ Verificato dal libro','Estratto da "La grammatica dei sapori" (N. Segnit) con citazione di pagina. Solo fatti, mai prosa originale.'));
+    leg.appendChild(srcCard('ai','~ Base AI — da validare','Stima da conoscenza generale (metadati, piatti, profili aromatici): un punto di partenza, non una verità. Va controllata.'));
+    leg.appendChild(srcCard('user','★ Tuo','Le tue modifiche e aggiunte, salvate nel browser; prevalgono sulla base AI ed sono esportabili.'));
+    main.appendChild(leg);
+    main.appendChild(el('div',{class:'sec-title'},el('h2',{},'I dati, layer per layer')));
+    const rows=[
+      ['📖 book','book','16 famiglie · 99 ingredienti · 1089 accostamenti ('+high+' alta / '+med+' media / '+thin+' incerta). Audit anti-copyright superato (0 copie letterali).'],
+      ['🏷️ metadati','ai','tipo · stagione · origine · reperibilità per i 99 ingredienti. '+(userMeta?userMeta+' validati da te.':'nessuno validato finora.')],
+      ['🍽️ piatti / feste / vino','ai','96 piatti · 22 occasioni · '+D.ext.pairings.length+' abbinamenti extra · '+Object.keys(D.ext.wine).length+' vini. '+(userDishes?userDishes+' piatti tuoi. ':'')+(validated?validated+' validati.':'')],
+      ['🧬 matrice','ai','18 famiglie aromatiche; profili calcolati dai metadati (NON dal libro). Le "affinità di profilo" sono spunti per esplorare, non accostamenti verificati.'],
+      ['👤 tuo','user','preferiti, piatti salvati, base "'+(U.base.city||'—')+'", modifiche metadati — solo nel tuo browser, con export/import.'],
+    ];
+    const tbl=el('div',{class:'fonti-table'});
+    rows.forEach(r=>tbl.appendChild(el('div',{class:'fonti-row'},
+      el('div',{class:'fl'},r[0]),
+      el('div',{},el('span',{class:'sbadge '+(r[1]==='ai'?'ai':'user')},r[1]==='book'?'verificato':r[1]==='user'?'tuo':'base AI'),
+        el('div',{class:'muted',style:'margin-top:5px;font-size:12.5px'},r[2])))));
+    main.appendChild(tbl);
+    main.appendChild(el('div',{class:'note-src',style:'margin-top:14px'},'🔒 Copyright: i libri di riferimento ("La grammatica dei sapori" di N. Segnit; "The Flavor Matrix" di J. Briscione) NON sono riprodotti — usiamo solo fatti, citazioni di pagina e l\'idea di rappresentazione. Nessuna prosa o dato proprietario è copiato.'));
+    main.appendChild(el('div',{class:'sec-title'},el('h2',{},'Le tre ruote — quando usarle')));
+    const w=el('div',{class:'fonti-cards'});
+    w.appendChild(srcCard('book','🧪 Esplora','La ruota-home: parti da un ingrediente, i colori mostrano cosa si abbina (dal libro), il bianco è escluso.'));
+    w.appendChild(srcCard('book','🎡 Ruota','Cascata guidata: ruote in serie che restringono passo passo fino a un gruppo di 3-4 ingredienti che funzionano insieme.'));
+    w.appendChild(srcCard('ai','🧬 Matrice','Profilo aromatico del singolo ingrediente (stima AI): per capire "di cosa sa" e trovare affinità da esplorare.'));
+    main.appendChild(w);
+    // validazione metadati in blocco
+    const nVal=D.book.ingredients.filter(i=>metaOf(i.id)._source==='user').length;
+    main.appendChild(el('div',{class:'sec-title'},el('h2',{},'Valida i metadati (in blocco)'),el('span',{class:'count'},nVal+'/99 validati da te')));
+    main.appendChild(el('p',{class:'muted',style:'margin:-4px 0 8px;font-size:12.5px'},'Conferma o correggi tipologia e reperibilità dei 99 ingredienti: ✓ marca i valori come "tuoi" (validati); cambiando un valore lo rendi tuo automaticamente.'));
+    main.appendChild(el('button',{class:'btn'+(state.validaOpen?' act':''),onclick:()=>{state.validaOpen=!state.validaOpen;renderFonti();}}, state.validaOpen?'Chiudi tabella':'Apri tabella di validazione →'));
+    if(state.validaOpen){
+      main.appendChild(el('div',{class:'mx-bar',style:'margin-top:10px'},
+        el('div',{class:'ff'},el('label',{},'Cerca'),el('input',{class:'mx-select',id:'valSearch',placeholder:'filtra ingrediente…',oninput:applyValidaFilter})),
+        el('div',{class:'ff'},el('label',{},' '),el('button',{class:'btn',onclick:()=>{const q=((document.getElementById('valSearch')||{}).value||'').toLowerCase();D.book.ingredients.forEach(i=>{if(i.name.toLowerCase().includes(q)&&metaOf(i.id)._source!=='user')validateMeta(i.id);});renderFonti();}},'✓ valida tutti i filtrati'))));
+      const tbl=el('div',{class:'val-table'});
+      tbl.appendChild(el('div',{class:'val-head'},el('div',{},'Ingrediente'),el('div',{},'Tipo'),el('div',{},'Reperibilità'),el('div',{},'Stagione'),el('div',{},'Fonte'),el('div',{},'')));
+      D.book.ingredients.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(i=>tbl.appendChild(validaRow(i)));
+      main.appendChild(tbl);
+    }
+  }
+
+  // ---- dettaglio ----
+  function openDetail(id){
+    const ing=byId.get(id),m=metaOf(id);
+    const body=document.getElementById('drawerBody');body.innerHTML='';
+    body.appendChild(el('div',{class:'top',style:'display:flex;align-items:center;gap:10px;margin-bottom:2px'},
+      el('span',{class:'fam-tag',style:`background:${famColor(ing.family)};width:16px;height:16px;border-radius:5px`}),
+      el('h2',{},ing.name)));
+    body.appendChild(el('div',{class:'meta',style:'color:var(--muted);font-size:13px;margin-bottom:8px'},
+      `${famById.get(ing.family).name} · ${m.type||'—'} · ${m.locality||'—'} · ${m.origin||'—'} · ${(m.season||[]).join(', ')||'—'}`));
+    body.appendChild(el('button',{class:'btn'+(isFav(id)?' act':''),style:'font-size:12.5px',onclick:()=>{toggleFav(id);openDetail(id);}}, isFav(id)?'★ nei preferiti':'☆ aggiungi ai preferiti'));
+    body.appendChild(metaEditor(id));
+
+    // piatti (layer esterno) che usano questo ingrediente
+    const dl=dishesByIngredient.get(id)||[];
+    if(dl.length){
+      body.appendChild(el('h3',{class:'drawer-h3'},`Piatti con ${ing.name} (${dl.length})`));
+      const dc=el('div',{class:'chips'});
+      dl.forEach(did=>{const d=dishById.get(did);if(d)dc.appendChild(el('button',{class:'chip',title:d.cuisine,onclick:()=>openDishDetail(did)}, d.name));});
+      body.appendChild(dc);
+    }
+    // vino (fonte esterna)
+    const w=wineFor(id);
+    if(w){
+      body.appendChild(el('h3',{class:'drawer-h3'},'🍷 Vino'));
+      body.appendChild(el('div',{class:'wine-box'}, el('b',{},w.wine),
+        w.style?el('span',{class:'muted'},' · '+w.style):'',
+        w.note?el('div',{class:'muted',style:'margin-top:3px'},w.note):''));
+    }
+    // abbinamenti extra oltre il libro (fonti esterne)
+    const ep=extPairsByIng.get(id)||[];
+    if(ep.length){
+      body.appendChild(el('h3',{class:'drawer-h3'},`Abbinamenti extra (${ep.length})`));
+      ep.forEach(p=>{ const other=p.a===id?p.b:p.a, on=byId.get(other); if(!on)return;
+        const note=el('div',{class:'pair-note'});
+        note.appendChild(el('div',{class:'ph'},
+          el('span',{class:'fam-tag',style:`background:${famColor(on.family)}`}), `${ing.name} & ${on.name}`,
+          el('span',{class:'badge',style:'margin-left:auto;'+(p.novel?'background:#efe4f3;color:#7a4a86;border-color:#e0cfe8':'')}, p.novel?'oltre il libro':'anche nel libro')));
+        if(p.note) note.appendChild(el('div',{class:'kv'},p.note));
+        note.appendChild(el('div',{class:'cite'},'Fonte esterna · sintesi, da validare'));
+        note.style.cursor='pointer'; note.title='clicca per aggiungere alla selezione';
+        note.addEventListener('click',()=>{if(!state.sel.includes(other))toggleSel(other);});
+        body.appendChild(note);
+      });
+    }
+
+    // affinità di profilo aromatico (stima AI, dalla matrice) — terzo segnale, ben etichettato
+    if(MRULES){
+      const pa=profileOf(id), ss=Object.values(pa).reduce((a,b)=>a+b,0)||1;
+      const aff=D.book.ingredients.map(x=>x.id).filter(x=>x!==id)
+        .map(x=>{const pb=profileOf(x);let s=0;for(const c in pa){if(pb[c])s+=Math.min(pa[c],pb[c]);}return {x,s};})
+        .filter(o=>o.s>0).sort((a,b)=>b.s-a.s).slice(0,6);
+      if(aff.length){
+        body.appendChild(el('h3',{class:'drawer-h3'},'Affinità di profilo (stima AI)'));
+        const ac=el('div',{class:'chips'});
+        aff.forEach(o=>{const on=byId.get(o.x);ac.appendChild(el('button',{class:'chip',title:'spunto dalla matrice (AI), non dal libro',onclick:()=>openDetail(o.x)},
+          el('span',{class:'dot',style:`background:${famColor(on.family)}`}),on.name+' ~'+Math.round(100*o.s/ss)+'%'));});
+        body.appendChild(ac);
+      }
+    }
+    // accostamenti con la selezione, oppure tutti
+    const targets = state.sel.filter(s=>s!==id && adj.get(id).has(s));
+    const list = targets.length? targets : Array.from(adj.get(id));
+    body.appendChild(el('h3',{style:'margin:16px 0 4px;font-family:system-ui;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)'},
+      targets.length?`Accostamenti con la selezione (${targets.length})`:`Tutti gli accostamenti (${list.length})`));
+
+    list.map(o=>edgeOf(id,o)).filter(Boolean)
+      .sort((a,b)=>(b.preparations?.length||0)-(a.preparations?.length||0))
+      .forEach(e=>{
+        const other = e.a===id? e.b : e.a;
+        const note=pairNoteEl(e);
+        note.style.cursor='pointer';
+        note.title='clicca per aggiungere alla selezione';
+        note.addEventListener('click',()=>{ if(!state.sel.includes(other)) toggleSel(other); });
+        body.appendChild(note);
+      });
+
+    openDrawer();
+  }
+  function closeDetail(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawerBg').classList.remove('open');}
+
+  function renderAll(){rebuildExt();renderNav();renderFilters();renderIngList();renderSelection();renderMain();}
+
+  // ---- eventi ----
+  document.getElementById('search').addEventListener('input',e=>{state.query=e.target.value;renderIngList();});
+  document.getElementById('clearSel').addEventListener('click',()=>{state.sel=[];state.resultQuery='';renderAll();});
+  document.getElementById('closeDrawer').addEventListener('click',closeDetail);
+  document.getElementById('drawerBg').addEventListener('click',closeDetail);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
+  document.getElementById('editBase').addEventListener('click',editBase);
+  document.getElementById('favBtn').addEventListener('click',()=>{state.favOnly=!state.favOnly;renderAll();});
+  document.getElementById('savedBtn').addEventListener('click',openSaved);
+  document.getElementById('exportBtn').addEventListener('click',exportData);
+  document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change',e=>{if(e.target.files[0])importData(e.target.files[0]);e.target.value='';});
+  function closeSide(){const s=document.querySelector('.side');if(s)s.classList.remove('open');const b=document.getElementById('sideBg');if(b)b.classList.remove('open');}
+  document.getElementById('menuBtn').addEventListener('click',()=>{document.querySelector('.side').classList.toggle('open');document.getElementById('sideBg').classList.toggle('open');});
+  document.getElementById('sideBg').addEventListener('click',closeSide);
+  if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){ window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
+  (function(){const lg=document.getElementById('logo'); if(lg) lg.appendChild(miniWheel());})();
+
+  renderAll();
+})();
+</script>
+</body>
+</html>

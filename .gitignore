@@ -1,0 +1,11 @@
+# --- COPYRIGHT: mai pubblicare i libri o il testo grezzo estratto ---
+LIBRARY/
+*.pdf
+tools/pipeline/out/        # intermedi: span/note grezze = prosa dei libri, NON pubblicabile
+
+# --- ambiente / locale ---
+.claude/
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
