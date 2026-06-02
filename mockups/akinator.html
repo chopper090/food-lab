@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FOOD·LAB — Mockup · Akinator (il mago dei sapori)</title>
+<style>
+@font-face{font-family:'Inter';font-weight:100 900;font-display:swap;src:url('../fonts/inter-latin.woff2') format('woff2')}
+@font-face{font-family:'Fraunces';font-weight:100 900;font-display:swap;src:url('../fonts/fraunces-latin.woff2') format('woff2')}
+:root{--bg:#f4f0e8;--panel:#fffefb;--surface:#fff;--ink:#23201c;--muted:#857a6b;--faint:#b3a892;--line:#e6ddcd;--accent:#d4521f;--accent-ink:#c2611f;--accent-soft:#fbe6d8;--ok:#5a8a3c;--radius:16px;--shadow:0 1px 2px rgba(60,40,20,.05),0 14px 36px -16px rgba(60,40,20,.26);--font-ui:'Inter',system-ui,-apple-system,sans-serif;--font-display:'Fraunces',Georgia,serif}
+[data-theme="dark"]{--bg:#14110d;--panel:#211b15;--surface:#281f17;--ink:#f1ebe0;--muted:#a89c8a;--faint:#6e6453;--line:#332a20;--accent:#f07a45;--accent-ink:#f3936b;--accent-soft:#39241a;--ok:#8cc06a}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.6 var(--font-ui);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+h1,h2{font-family:var(--font-display);font-weight:600;margin:0;letter-spacing:-.01em}
+header{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:14px;padding:13px 24px;background:var(--panel);border-bottom:1px solid var(--line)}
+header h1{font-size:21px}
+header .tag{color:var(--muted);font-size:13px}
+.toggle{margin-left:auto;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:11px;width:38px;height:34px;font-size:16px;cursor:pointer}
+.wrap{max-width:740px;margin:0 auto;padding:34px 24px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:34px 32px;box-shadow:var(--shadow);min-height:440px;display:flex;flex-direction:column}
+.steps{display:flex;gap:6px;margin-bottom:22px}
+.steps i{height:5px;border-radius:3px;background:var(--line);flex:1;transition:.2s}
+.steps i.on{background:var(--accent)}
+.q{font-family:var(--font-display);font-size:27px;font-weight:600;letter-spacing:-.015em;margin-bottom:6px}
+.qsub{color:var(--muted);font-size:14px;margin-bottom:24px}
+.opts{display:flex;flex-direction:column;gap:12px}
+.opt{display:flex;align-items:center;gap:14px;text-align:left;font:inherit;font-size:16px;font-weight:500;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:16px;padding:16px 18px;cursor:pointer;transition:.14s}
+.opt:hover{border-color:var(--accent);background:var(--accent-soft);transform:translateY(-2px)}
+.opt .em{font-size:26px;flex:0 0 auto}
+.opt .small{display:block;font-size:12.5px;color:var(--muted);font-weight:400;margin-top:2px}
+.grid{display:flex;flex-wrap:wrap;gap:9px}
+.gbtn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;transition:.13s}
+.gbtn:hover{border-color:var(--accent);background:var(--accent-soft)}
+.dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
+.row{display:flex;gap:10px;align-items:center;margin-top:auto;padding-top:22px}
+.back{font:inherit;font-size:13.5px;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:10px;padding:8px 14px;cursor:pointer}
+.back:hover{color:var(--accent);border-color:var(--accent)}
+.btnp{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:11px;padding:9px 18px;cursor:pointer}
+.chosen{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
+.tagsel{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--panel);border-radius:999px;padding:6px 13px;font-size:14px;font-weight:500}
+[data-theme=dark] .tagsel{background:var(--accent);color:#fff}
+.result h2{font-size:24px;margin-bottom:4px}
+.combo{font-family:var(--font-display);font-size:22px;font-weight:600;line-height:1.4;margin:6px 0 14px}
+.combo .plus{color:var(--accent);margin:0 7px}
+.note{color:var(--muted);font-size:13.5px;margin-top:8px;background:var(--accent-soft);border-radius:12px;padding:11px 14px}
+.muted{color:var(--muted)}
+.scroll{max-height:300px;overflow:auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>FOOD<span style="color:var(--accent)">·</span>LAB</h1>
+  <span class="tag">Mockup · «Akinator» — il mago dei sapori</span>
+  <button class="toggle" id="tg" title="tema">🌙</button>
+</header>
+<div class="wrap"><div class="card" id="card"></div></div>
+
+<script src="../data/data.js"></script>
+<script>
+(function(){
+const D=window.FOODLAB_DATA;
+const ings=D.book.ingredients, fams=D.book.families;
+const byId=new Map(ings.map(i=>[i.id,i]));
+const famById=new Map(fams.map(f=>[f.id,f]));
+const famOrder=fams.map(f=>f.id);
+const isDark=()=>document.documentElement.getAttribute('data-theme')==='dark';
+const famColor=fid=>{const i=famOrder.indexOf(fid);const h=Math.round(i*360/famOrder.length);return isDark()?`hsl(${h} 56% 58%)`:`hsl(${h} 52% 48%)`;};
+const metaOf=id=>(D.meta&&D.meta.ingredient_meta&&D.meta.ingredient_meta[id])||{};
+const adj=new Map();ings.forEach(i=>adj.set(i.id,new Set()));
+D.book.edges.forEach(e=>{if(adj.get(e.a))adj.get(e.a).add(e.b);if(adj.get(e.b))adj.get(e.b).add(e.a);});
+const EXT=D.ext||{dishes:[],occasions:[]};
+const SEASONS=['primavera','estate','autunno','inverno'];
+const inSeason=(id,s)=>{const ss=metaOf(id).season||[];return ss.includes(s)||ss.includes("tutto l'anno");};
+function E(t,a,...kids){const e=document.createElement(t);if(a)for(const k in a){if(k==='class')e.className=a[k];else if(k==='style')e.setAttribute('style',a[k]);else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),a[k]);else e.setAttribute(k,a[k]);}kids.flat().forEach(c=>c!=null&&e.appendChild(typeof c==='string'?document.createTextNode(c):c));return e;}
+function deg(id){return adj.get(id)?adj.get(id).size:0;}
+const popular=ings.slice().sort((a,b)=>deg(b.id)-deg(a.id)).slice(0,10);
+function candidates(chain){let c=ings.map(i=>i.id).filter(id=>chain.indexOf(id)<0);if(chain.length)c=c.filter(id=>chain.every(x=>adj.get(x).has(id)));return c;}
+
+let st={};
+function reset(){st={view:'goal',goal:null,ing:null,season:null,chain:[],occ:null};render();}
+
+function steps(n,tot){const s=E('div',{class:'steps'});for(let i=0;i<tot;i++)s.appendChild(E('i',{class:i<n?'on':''}));return s;}
+function dot(fid){return E('span',{class:'dot',style:`background:${famColor(fid)}`});}
+function famPick(onPick){const g=E('div',{class:'grid'});fams.slice().forEach(f=>g.appendChild(E('button',{class:'gbtn',onclick:()=>onPick(f.id)},dot(f.id),f.name)));return g;}
+function ingPick(fid,onPick){const g=E('div',{class:'grid scroll'});ings.filter(i=>i.family===fid).sort((a,b)=>a.name.localeCompare(b.name)).forEach(i=>g.appendChild(E('button',{class:'gbtn',onclick:()=>onPick(i.id)},i.name)));return g;}
+
+function render(){
+  const c=document.getElementById('card');c.innerHTML='';
+  if(st.view==='goal'){
+    c.appendChild(steps(0,3));
+    c.appendChild(E('div',{class:'q'},'🔮 Cosa posso fare per te?'));
+    c.appendChild(E('div',{class:'qsub'},'Rispondi a poche domande e ti porto dritto alla cosa giusta.'));
+    const o=E('div',{class:'opts'});
+    o.appendChild(E('button',{class:'opt',onclick:()=>{st.goal='pairs';st.view='pickfam';render();}},E('span',{class:'em'},'🧩'),E('span',{},'Cosa abbino a un ingrediente?',E('span',{class:'small'},'Ho qualcosa e voglio sapere con cosa sta bene'))));
+    o.appendChild(E('button',{class:'opt',onclick:()=>{st.goal='combo';st.chain=[];st.view='combostart';render();}},E('span',{class:'em'},'🍽️'),E('span',{},'Componimi una combo di 3-4',E('span',{class:'small'},'Ti guido passo passo a un insieme che funziona'))));
+    o.appendChild(E('button',{class:'opt',onclick:()=>{st.goal='occ';st.view='occmode';render();}},E('span',{class:'em'},'🎉'),E('span',{},'Un\'idea per stagione o occasione',E('span',{class:'small'},'Cosa è di stagione, o un piatto per una festa'))));
+    c.appendChild(o);
+    return;
+  }
+  // ---- PAIRS ----
+  if(st.view==='pickfam'){
+    c.appendChild(steps(1,3));
+    c.appendChild(E('div',{class:'q'},'Da quale famiglia parte il tuo ingrediente?'));
+    c.appendChild(E('div',{class:'qsub'},'Oppure scegline uno tra i più versatili, sotto.'));
+    c.appendChild(famPick(fid=>{st.fam=fid;st.view='pickfaming';render();}));
+    c.appendChild(E('div',{style:'margin-top:18px'},E('div',{class:'qsub',style:'margin-bottom:9px'},'Popolari:'),(function(){const g=E('div',{class:'grid'});popular.forEach(i=>g.appendChild(E('button',{class:'gbtn',onclick:()=>{st.ing=i.id;st.view='pickseason';render();}},dot(i.family),i.name)));return g;})()));
+    c.appendChild(E('div',{class:'row'},E('button',{class:'back',onclick:()=>{st.view='goal';render();}},'← indietro')));
+    return;
+  }
+  if(st.view==='pickfaming'){
+    c.appendChild(steps(1,3));
+    c.appendChild(E('div',{class:'q'},'Quale ingrediente di '+famById.get(st.fam).name+'?'));
+    c.appendChild(ingPick(st.fam,id=>{st.ing=id;st.view='pickseason';render();}));
+    c.appendChild(E('div',{class:'row'},E('button',{class:'back',onclick:()=>{st.view='pickfam';render();}},'← indietro')));
+    return;
+  }
+  if(st.view==='pickseason'){
+    c.appendChild(steps(2,3));
+    c.appendChild(E('div',{class:'chosen'},E('span',{class:'tagsel'},dot(byId.get(st.ing).family),byId.get(st.ing).name)));
+    c.appendChild(E('div',{class:'q'},'Vincoli di stagione?'));
+    c.appendChild(E('div',{class:'qsub'},'Mostro solo gli abbinamenti reperibili nella stagione scelta.'));
+    const o=E('div',{class:'opts'});
+    o.appendChild(E('button',{class:'opt',onclick:()=>{st.season=null;st.view='resultpairs';render();}},E('span',{class:'em'},'🌐'),E('span',{},'Qualsiasi stagione')));
+    SEASONS.forEach(s=>o.appendChild(E('button',{class:'opt',onclick:()=>{st.season=s;st.view='resultpairs';render();}},E('span',{class:'em'},({primavera:'🌱',estate:'☀️',autunno:'🍂',inverno:'❄️'})[s]),E('span',{},s[0].toUpperCase()+s.slice(1)))));
+    c.appendChild(o);
+    c.appendChild(E('div',{class:'row'},E('button',{class:'back',onclick:()=>{st.view='pickfam';render();}},'← indietro')));
+    return;
+  }
+  if(st.view==='resultpairs'){
+    c.appendChild(steps(3,3));
+    let pairs=[...adj.get(st.ing)].map(x=>byId.get(x)).filter(Boolean);
+    if(st.season)pairs=pairs.filter(p=>inSeason(p.id,st.season));
+    pairs.sort((a,b)=>deg(b.id)-deg(a.id));
+    c.appendChild(E('div',{class:'result'},E('h2',{},'✨ '+byId.get(st.ing).name+' si abbina con '+pairs.length+(st.season?' (in '+st.season+')':''))));
+    c.appendChild(E('div',{class:'qsub'},'Dal più versatile. Tocca un abbinamento per esplorarlo a sua volta.'));
+    const g=E('div',{class:'grid scroll'});
+    pairs.forEach(p=>g.appendChild(E('button',{class:'gbtn',onclick:()=>{st.ing=p.id;st.view='pickseason';render();}},dot(p.family),p.name)));
+    if(!pairs.length)g.appendChild(E('div',{class:'muted'},'Nessuno coi vincoli scelti.'));
+    c.appendChild(g);
+    c.appendChild(E('div',{class:'row'},E('button',{class:'back',onclick:()=>{st.view='pickseason';render();}},'← cambia stagione'),E('button',{class:'btnp',onclick:reset},'↺ ricomincia')));
+    return;
+  }
+  // ---- COMBO ----
+  if(st.view==='combostart'){
+    c.appendChild(steps(0,3));
+    c.appendChild(E('div',{class:'q'},'Da dove partiamo?'));
+    c.appendChild(E('div',{class:'qsub'},'Scegli il primo ingrediente, o lascia decidere a me.'));
+    const o=E('div',{class:'opts'});
+    o.appendChild(E('button',{class:'opt',onclick:()=>{const i=popular[Math.floor(popular.length*0.3)];st.chain=[i.id];st.view='combobuild';render();}},E('span',{class:'em'},'🎲'),E('span',{},'Scegli tu per me')));
+    popular.slice(0,6).forEach(i=>o.appendChild(E('button',{class:'opt',onclick:()=>{st.chain=[i.id];st.view='combobuild';render();}},dot(i.family),E('span',{},i.name))));
+    c.appendChild(o);
+    c.appendChild(E('div',{class:'row'},E('button',{class:'back',onclick:()=>{st.view='goal';render();}},'← indietro')));
+    return;
+  }
+  if(st.view==='combobuild'){
+    const cand=candidates(st.chain).sort((a,b)=>deg(b)-deg(a));
+    c.appendChild(steps(Math.min(st.chain.length,3),3));
+    c.appendChild(E('div',{class:'chosen'},st.chain.map(id=>E('span',{class:'tagsel'},dot(byId.get(id).family),byId.get(id).name))));
+    if(st.chain.length>=4 || !cand.length){st.view='comboresult';return render();}
+    c.appendChild(E('div',{class:'q'},st.chain.length<3?'Aggiungo il prossimo che lega con tutti…':'Un altro? (o concludi)'));
+    c.appendChild(E('div',{class:'qsub'},cand.length+' ingredienti si abbinano con tutta la catena. Scegline uno:'));
+    const g=E('div',{class:'grid scroll'});
+    cand.slice(0,18).forEach(id=>g.appendChild(E('button',{class:'gbtn',onclick:()=>{st.chain.push(id);st.view='combobuild';render();}},dot(byId.get(id).family),byId.get(id).name)));
+    c.appendChild(g);
+    const row=E('div',{class:'row'});row.appendChild(E('button',{class:'back',onclick:()=>{st.chain.pop();if(!st.chain.length){st.view='combostart';}render();}},'← togli ultimo'));
+    if(st.chain.length>=3)row.appendChild(E('button',{class:'btnp',onclick:()=>{st.view='comboresult';render();}},'✓ concludi'));
+    c.appendChild(row);
+    return;
+  }
+  if(st.view==='comboresult'){
+    c.appendChild(steps(3,3));
+    c.appendChild(E('div',{class:'result'},E('h2',{},'🍽️ La tua combinazione')));
+    const combo=E('div',{class:'combo'});st.chain.forEach((id,i)=>{combo.appendChild(E('span',{},byId.get(id).name));if(i<st.chain.length-1)combo.appendChild(E('span',{class:'plus'},'+'));});
+    c.appendChild(combo);
+    c.appendChild(E('div',{class:'note'},'Ogni coppia di questi ingredienti è un accostamento dal libro: insieme formano una base che funziona. Aggiungi grassi/acidità/erbe a piacere per chiudere il piatto.'));
+    c.appendChild(E('div',{class:'row'},E('button',{class:'back',onclick:()=>{st.view='combobuild';render();}},'← modifica'),E('button',{class:'btnp',onclick:reset},'↺ ricomincia')));
+    return;
+  }
+  // ---- OCCASION ----
+  if(st.view==='occmode'){
+    c.appendChild(steps(1,3));
+    c.appendChild(E('div',{class:'q'},'Stagione o occasione?'));
+    const o=E('div',{class:'opts'});
+    o.appendChild(E('button',{class:'opt',onclick:()=>{st.occmode='stag';st.view='occpick';render();}},E('span',{class:'em'},'📅'),E('span',{},'Cosa è di stagione adesso')));
+    o.appendChild(E('button',{class:'opt',onclick:()=>{st.occmode='occ';st.view='occpick';render();}},E('span',{class:'em'},'🎉'),E('span',{},'Un piatto per un\'occasione',E('span',{class:'small'},(EXT.occasions||[]).length+' occasioni · '+(EXT.dishes||[]).length+' piatti'))));
+    c.appendChild(o);
+    c.appendChild(E('div',{class:'row'},E('button',{class:'back',onclick:()=>{st.view='goal';render();}},'← indietro')));
+    return;
+  }
+  if(st.view==='occpick'){
+    c.appendChild(steps(2,3));
+    if(st.occmode==='stag'){
+      c.appendChild(E('div',{class:'q'},'Che stagione?'));
+      const o=E('div',{class:'opts'});
+      SEASONS.forEach(s=>o.appendChild(E('button',{class:'opt',onclick:()=>{st.season=s;st.view='occresult';render();}},E('span',{class:'em'},({primavera:'🌱',estate:'☀️',autunno:'🍂',inverno:'❄️'})[s]),E('span',{},s[0].toUpperCase()+s.slice(1)))));
+      c.appendChild(o);
+    } else {
+      c.appendChild(E('div',{class:'q'},'Quale occasione?'));
+      const g=E('div',{class:'grid scroll'});
+      (EXT.occasions||[]).forEach(o=>g.appendChild(E('button',{class:'gbtn',onclick:()=>{st.occ=o.id;st.view='occresult';render();}},(o.emoji||'🎉')+' '+o.name)));
+      if(!(EXT.occasions||[]).length)g.appendChild(E('div',{class:'muted'},'(nessuna occasione nel dataset)'));
+      c.appendChild(g);
+    }
+    c.appendChild(E('div',{class:'row'},E('button',{class:'back',onclick:()=>{st.view='occmode';render();}},'← indietro')));
+    return;
+  }
+  if(st.view==='occresult'){
+    c.appendChild(steps(3,3));
+    if(st.occmode==='stag'){
+      const list=ings.filter(i=>inSeason(i.id,st.season)).sort((a,b)=>deg(b.id)-deg(a.id)).slice(0,24);
+      c.appendChild(E('div',{class:'result'},E('h2',{},'📅 Di stagione in '+st.season)));
+      c.appendChild(E('div',{class:'qsub'},'I più versatili da cui partire. Toccane uno per vedere i suoi abbinamenti.'));
+      const g=E('div',{class:'grid scroll'});list.forEach(i=>g.appendChild(E('button',{class:'gbtn',onclick:()=>{st.goal='pairs';st.ing=i.id;st.view='pickseason';render();}},dot(i.family),i.name)));c.appendChild(g);
+    } else {
+      const dishes=(EXT.dishes||[]).filter(d=>(d.occasions||[]).includes(st.occ)||d.occasion===st.occ);
+      const occ=(EXT.occasions||[]).find(o=>o.id===st.occ)||{name:'occasione'};
+      c.appendChild(E('div',{class:'result'},E('h2',{},'🎉 Idee per '+occ.name)));
+      const g=E('div',{class:'grid scroll'});
+      (dishes.length?dishes:(EXT.dishes||[]).slice(0,12)).forEach(d=>g.appendChild(E('button',{class:'gbtn'},'🍽️ '+d.name)));
+      if(!(EXT.dishes||[]).length)g.appendChild(E('div',{class:'muted'},'(nessun piatto nel dataset)'));
+      c.appendChild(g);
+    }
+    c.appendChild(E('div',{class:'row'},E('button',{class:'back',onclick:()=>{st.view='occpick';render();}},'← indietro'),E('button',{class:'btnp',onclick:reset},'↺ ricomincia')));
+    return;
+  }
+}
+document.getElementById('tg').addEventListener('click',()=>{const d=isDark();document.documentElement.setAttribute('data-theme',d?'light':'dark');document.getElementById('tg').textContent=d?'🌙':'☀️';render();});
+reset();
+})();
+</script>
+</body>
+</html>
