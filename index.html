@@ -188,7 +188,14 @@
   .logo svg{width:30px;height:30px;transition:transform .6s ease}
   .logo svg path{stroke:var(--panel);stroke-width:.6}
   header:hover .logo svg{transform:rotate(180deg)}
-  .home-wheel{display:flex;justify-content:center;margin:2px 0 12px}
+  .home-wheel{display:flex;justify-content:center;margin:2px 0 8px}
+  .wheel-action{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:center;max-width:660px;margin:0 auto 12px;padding:0 10px;min-height:36px}
+  .wheel-action .wa-hint{color:var(--muted);font-size:12.5px;text-align:center;line-height:1.5;max-width:560px}
+  .wheel-action.show{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:9px 13px;box-shadow:var(--shadow);animation:fadein .2s ease}
+  .wheel-action .wa-name{font-family:var(--font-display);font-weight:600;font-size:17px;letter-spacing:-.01em}
+  .wheel-action .wa-fam{color:var(--muted);font-size:12.5px}
+  .bigwheel g.focus .ing-wedge{stroke:var(--ink);stroke-width:2.4;filter:brightness(1.06)}
+  .bigwheel g.focus .ing-wlabel{font-weight:700;fill:var(--accent-ink)}
   .bigwheel{width:600px;max-width:94%;height:auto;overflow:visible;animation:fadein .35s ease}
   .bigwheel .fam-wedge{stroke:var(--wheel-stroke);stroke-width:1;transition:fill .25s ease}
   .bigwheel .fam-label{font:600 8px system-ui;letter-spacing:.2px;cursor:pointer}
@@ -711,7 +718,8 @@
     return svg;
   }
   // grande ruota concentrica: anello famiglie + anello ingredienti; colore=compatibile/selezionato, bianco=escluso
-  function bigWheel(){
+  function bigWheel(opts){
+    opts=opts||{};
     const sel=new Set(state.sel);
     const compatible=id=>{ if(!passes(id)) return false; if(!state.sel.length||sel.has(id)) return true; return state.sel.every(s=>adj.get(s).has(id)); };
     const ordered=[], spans=[];
@@ -743,18 +751,20 @@
       const t=document.createElementNS(SVGNS,'text'); t.textContent=ing.name; t.setAttribute('class','ing-wlabel'+(picked?' picked':'')+(comp||picked?'':' off')); t.setAttribute('font-size',fs);
       t.setAttribute('x',lx); t.setAttribute('y',ly); t.setAttribute('text-anchor',left?'end':'start'); t.setAttribute('dominant-baseline','middle');
       t.setAttribute('transform',`rotate(${left?deg+180:deg} ${lx} ${ly})`);
-      const g=document.createElementNS(SVGNS,'g'); g.style.cursor='pointer'; g.appendChild(p); g.appendChild(t);
-      g.addEventListener('click',()=>toggleSel(id));
+      const g=document.createElementNS(SVGNS,'g'); g.style.cursor='pointer'; g.setAttribute('data-ing',id); if(state.focusIng===id) g.setAttribute('class','focus'); g.appendChild(p); g.appendChild(t);
+      g.addEventListener('click',()=>{ if(state.focusIng===id){ state.focusIng=null; toggleSel(id); } else setFocus(id); });
       g.addEventListener('mouseenter',()=>setCenter(ing.name));
-      g.addEventListener('mouseleave',()=>setCenter(def()));
+      g.addEventListener('mouseleave',()=>setCenter(focusName()));
       svg.appendChild(g);
     });
     const hub=document.createElementNS(SVGNS,'circle'); hub.setAttribute('r',R.hub); hub.setAttribute('class','wheel-hub');
-    hub.addEventListener('click',()=>{ if(state.sel.length){state.sel=[];state.resultQuery='';renderAll();} }); svg.appendChild(hub);
+    hub.addEventListener('click',()=>{ if(state.focusIng){ state.focusIng=null; setCenter(def()); svg.querySelectorAll('g.focus').forEach(e=>e.classList.remove('focus')); opts.onFocus&&opts.onFocus(null); } else if(state.sel.length){state.sel=[];state.resultQuery='';renderAll();} }); svg.appendChild(hub);
     const center=document.createElementNS(SVGNS,'text'); center.setAttribute('class','wheel-center'); center.setAttribute('text-anchor','middle'); center.setAttribute('dominant-baseline','middle');
     const def=()=> state.sel.length? (state.sel.length+(state.sel.length===1?' scelto':' scelti')) : 'FOOD·LAB';
     const setCenter=txt=>{center.textContent=txt; center.style.fontSize=(txt.length>13?Math.max(8,Math.round(150/txt.length)):11.5)+'px';};
-    setCenter(def()); svg.appendChild(center);
+    function focusName(){ return state.focusIng? byId.get(state.focusIng).name : def(); }
+    function setFocus(fid){ state.focusIng=fid; svg.querySelectorAll('g.focus').forEach(e=>e.classList.remove('focus')); const grp=svg.querySelector('g[data-ing="'+fid+'"]'); if(grp) grp.classList.add('focus'); setCenter(byId.get(fid).name); opts.onFocus&&opts.onFocus(fid); }
+    setCenter(focusName()); svg.appendChild(center);
     return svg;
   }
 
@@ -779,10 +789,24 @@
 
   function renderEsplora(){
     const main=document.getElementById('main');main.innerHTML='';
-    const wheelWrap=el('div',{class:'home-wheel'}); wheelWrap.appendChild(bigWheel()); main.appendChild(wheelWrap);
+    const actionBar=el('div',{class:'wheel-action',id:'wheelAction'});
+    function updateActionBar(id){
+      actionBar.innerHTML='';
+      if(!id){ actionBar.className='wheel-action';
+        actionBar.appendChild(el('span',{class:'wa-hint'},'👆 Tocca un ingrediente per vederne il nome e aggiungerlo · una famiglia (anello interno) per filtrare · il centro per azzerare'));
+        return; }
+      const ing=byId.get(id), m=metaOf(id), inSel=state.sel.includes(id);
+      actionBar.className='wheel-action show';
+      actionBar.appendChild(el('span',{class:'fam-tag',style:`background:${famColor(ing.family)};width:14px;height:14px;border-radius:4px`}));
+      actionBar.appendChild(el('span',{class:'wa-name'},ing.name));
+      actionBar.appendChild(el('span',{class:'wa-fam'},famById.get(ing.family).name+(m.type?' · '+m.type:'')));
+      actionBar.appendChild(el('button',{class:'btn act',onclick:()=>{state.focusIng=null;toggleSel(id);}}, inSel?'✓ togli dalla selezione':'➕ aggiungi'));
+      actionBar.appendChild(el('button',{class:'btn',onclick:()=>openDetail(id)},'ⓘ dettaglio'));
+    }
+    const wheelWrap=el('div',{class:'home-wheel'}); wheelWrap.appendChild(bigWheel({onFocus:updateActionBar})); main.appendChild(wheelWrap);
+    main.appendChild(actionBar);
+    updateActionBar(state.focusIng||null);
     if(!state.sel.length){
-      main.appendChild(el('p',{class:'muted',style:'text-align:center;max-width:580px;margin:2px auto 0'},
-        'Tocca un ingrediente sulla ruota: i colori mostrano cosa puoi ancora abbinare, il bianco è escluso. Tocca una famiglia (anello interno) per filtrare; tocca il centro per azzerare.'));
       return;
     }
     const cand=candidates();
