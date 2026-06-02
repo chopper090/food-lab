@@ -12,6 +12,8 @@
 (function(){try{var t=localStorage.getItem('foodlab_theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 </script>
 <style>
+  @font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url('./fonts/inter-latin.woff2') format('woff2')}
+  @font-face{font-family:'Fraunces';font-style:normal;font-weight:100 900;font-display:swap;src:url('./fonts/fraunces-latin.woff2') format('woff2')}
   :root{
     color-scheme:light;
     --bg:#f4f0e8; --bg-2:#ece6da; --panel:#fffefb; --surface:#ffffff; --surface-2:#f7f1e7;
@@ -46,11 +48,11 @@
     --shadow-lg:0 22px 60px -18px rgba(0,0,0,.7);
   }
   *{box-sizing:border-box}
-  body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
-  h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:600;margin:0}
+  body{margin:0;font:15px/1.6 var(--font-ui);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;font-optical-sizing:auto;letter-spacing:-.012em;line-height:1.16}
   button{font:inherit;cursor:pointer}
-  header{display:flex;align-items:baseline;gap:14px;padding:16px 22px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
-  header h1{font-size:22px;letter-spacing:.5px}
+  header{display:flex;align-items:center;gap:16px;padding:13px 24px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--panel) 85%,transparent);backdrop-filter:saturate(1.3) blur(12px);-webkit-backdrop-filter:saturate(1.3) blur(12px);position:sticky;top:0;z-index:5}
+  header h1{font-size:23px;letter-spacing:-.01em}
   header .sub{color:var(--muted);font-size:13px}
   header .attr{margin-left:14px;color:var(--muted);font-size:12px;text-align:right}
   .icon-btn{margin-left:auto;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:11px;width:36px;height:34px;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center;transition:.15s;flex:0 0 auto}
@@ -60,8 +62,10 @@
   .side{border-right:1px solid var(--line);overflow:auto;padding:16px;background:var(--panel)}
   .main{overflow:auto;padding:20px 24px}
   .block{margin-bottom:18px}
-  .block h3{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px;font-family:system-ui}
-  .search{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+  .block h3{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px;font-family:var(--font-ui)}
+  .search{width:100%;padding:9px 13px;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink);transition:border-color .15s,box-shadow .15s;outline:none}
+  .search:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .search::placeholder{color:var(--faint)}
   .chips{display:flex;flex-wrap:wrap;gap:6px}
   .chip{padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;color:var(--ink);display:inline-flex;align-items:center;gap:6px;transition:.12s}
   .chip:hover{border-color:var(--accent)}
@@ -80,11 +84,11 @@
   .sel-chip button:hover{opacity:1}
   .muted{color:var(--muted)}
   .row-between{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .btn{padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-size:13px}
+  .btn{padding:7px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:13px;transition:.15s}
   .btn:hover{border-color:var(--accent);color:var(--accent)}
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:13px 14px;box-shadow:var(--shadow);cursor:pointer;transition:.12s;position:relative}
-  .card:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 15px;box-shadow:var(--shadow);cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;position:relative}
+  .card:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:var(--shadow-lg)}
   .card .top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
   .card .name{font-weight:600}
   .card .meta{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
@@ -96,7 +100,7 @@
   .add{position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--accent);font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
   .add:hover{background:var(--accent);color:#fff}
   .sec-title{display:flex;align-items:center;gap:10px;margin:20px 0 10px}
-  .sec-title h2{font-size:17px}
+  .sec-title h2{font-size:19px}
   .sec-title .count{color:var(--muted);font-size:13px}
   .empty{color:var(--muted);padding:40px 10px;text-align:center;max-width:520px;margin:0 auto}
   .empty .big{font-size:42px;margin-bottom:8px}
@@ -105,7 +109,7 @@
   .drawer-bg.open{display:block}
   .drawer{position:fixed;top:0;right:0;height:100%;width:min(440px,92vw);background:var(--panel);box-shadow:-8px 0 30px rgba(60,40,20,.14);transform:translateX(100%);transition:.22s;z-index:21;overflow:auto;padding:22px}
   .drawer.open{transform:none}
-  .drawer h2{font-size:20px;margin-bottom:2px}
+  .drawer h2{font-size:23px;margin-bottom:2px}
   .pair-note{border:1px solid var(--line);border-radius:12px;padding:13px;margin-top:12px;background:var(--surface)}
   .pair-note .ph{font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px}
   .kv{font-size:13px;margin:7px 0}
@@ -153,9 +157,9 @@
   /* Fase 5: navigazione a schede, piatti, occasioni, stagione, restyle */
   header{gap:18px}
   .nav{display:flex;gap:6px}
-  .navbtn{padding:7px 15px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:13.5px;font-weight:500;transition:.15s}
-  .navbtn:hover{border-color:var(--accent);color:var(--accent)}
-  .navbtn.on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 9px rgba(194,97,31,.28)}
+  .navbtn{padding:7px 14px;border-radius:11px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:13.5px;font-weight:500;transition:.15s}
+  .navbtn:hover{background:var(--tint-2);color:var(--ink)}
+  .navbtn.on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 13px -3px color-mix(in srgb,var(--accent) 60%,transparent)}
   @keyframes fadein{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
   .main.fade{animation:fadein .28s ease}
   .dish-card .flag{font-size:18px;line-height:1}
@@ -166,7 +170,7 @@
   .occ-card .name{font-weight:600;font-size:15px}
   .occ-card .meta{justify-content:center;margin-top:5px}
   .season-hero{border-radius:18px;padding:22px;margin-bottom:18px;color:#fff;box-shadow:var(--shadow);position:relative;overflow:hidden}
-  .season-hero h2{font-size:27px;margin:3px 0 11px;font-family:Georgia,serif}
+  .season-hero h2{font-size:27px;margin:3px 0 11px;font-family:var(--font-display)}
   .season-hero .season-now{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;opacity:.9}
   .season-hero .season-switch{display:flex;gap:6px;flex-wrap:wrap}
   .season-hero .chip{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4);color:#fff}
@@ -176,12 +180,13 @@
   .season-estate{background:linear-gradient(135deg,#e6a019,#d9762b)}
   .season-autunno{background:linear-gradient(135deg,#c2611f,#9c4a2a)}
   .season-inverno{background:linear-gradient(135deg,#5b7fa6,#80a0c2)}
-  .drawer-h3{margin:16px 0 6px;font-family:system-ui;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  .drawer-h3{margin:16px 0 6px;font-family:var(--font-ui);font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
   .wine-box{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--tint-2);font-size:13.5px}
   /* Ruota come identità: logo + home wheel + albero */
   header h1{display:inline-flex;align-items:center;gap:9px}
   .logo{display:inline-flex}
   .logo svg{width:30px;height:30px;transition:transform .6s ease}
+  .logo svg path{stroke:var(--panel);stroke-width:.6}
   header:hover .logo svg{transform:rotate(180deg)}
   .home-wheel{display:flex;justify-content:center;margin:2px 0 12px}
   .bigwheel{width:540px;max-width:94%;height:auto;overflow:visible;animation:fadein .35s ease}
@@ -191,10 +196,11 @@
   .bigwheel .ing-wedge.off{fill:var(--wheel-off);stroke:var(--line)}
   .bigwheel .ing-wedge.picked{stroke:var(--ink);stroke-width:2.4}
   .bigwheel g:hover .ing-wedge{stroke:var(--ink);stroke-width:1.5}
-  .bigwheel .ing-wlabel{fill:var(--ink);font-family:system-ui;pointer-events:none}
+  .bigwheel .ing-wlabel{fill:var(--ink);font-family:var(--font-ui);font-weight:500;pointer-events:none}
+  .bigwheel g:hover .ing-wlabel{font-weight:700;fill:var(--accent-ink)}
   .bigwheel .ing-wlabel.off{fill:var(--wheel-off-ink)}
   .bigwheel .wheel-hub{fill:var(--hub);cursor:pointer}
-  .bigwheel .wheel-center{fill:#fff;font:600 11px Georgia,serif;pointer-events:none}
+  .bigwheel .wheel-center{fill:#fff;font:600 11px var(--font-display);pointer-events:none}
   .tree-bar{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 15px;margin-bottom:14px;font-size:14px;box-shadow:var(--shadow)}
   /* Matrice dei sapori (sunburst a raggi variabili) */
   .matrix-wheel{width:560px;max-width:94%;height:auto;overflow:visible;animation:fadein .35s ease}
@@ -202,7 +208,7 @@
   .matrix-wheel .mx-band{stroke:var(--wheel-stroke);stroke-width:1;cursor:pointer}
   .matrix-wheel .mx-cat-label{font:600 8px system-ui;fill:#fff;pointer-events:none}
   .matrix-wheel .wheel-hub{fill:var(--hub)}
-  .matrix-wheel .wheel-center{fill:#fff;font:600 12px Georgia,serif;pointer-events:none}
+  .matrix-wheel .wheel-center{fill:#fff;font:600 12px var(--font-display);pointer-events:none}
   .mx-bar{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:6px}
   .mx-bar .ff label{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);display:block;margin-bottom:3px}
   .mx-select{padding:7px 11px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;min-width:210px}
@@ -265,8 +271,9 @@
   .wheel-svg .wedge{stroke:var(--wheel-stroke);stroke-width:.6;transition:stroke .1s,opacity .1s;opacity:.92}
   .wheel-svg g:hover .wedge{opacity:1;stroke:var(--ink);stroke-width:1.6}
   .wheel-svg .wedge.sel{stroke:var(--ink);stroke-width:2.4;opacity:1}
-  .wheel-svg .wlabel{fill:var(--ink);font-family:system-ui;pointer-events:none}
-  .wheel-svg .wcenter{fill:var(--ink);font-weight:600;font-size:14px;font-family:Georgia,serif}
+  .wheel-svg .wlabel{fill:var(--ink);font-family:var(--font-ui);font-weight:500;pointer-events:none}
+  .wheel-svg g:hover .wlabel{font-weight:700;fill:var(--accent-ink)}
+  .wheel-svg .wcenter{fill:var(--ink);font-weight:600;font-size:14px;font-family:var(--font-display)}
   .wheel-arrow{align-self:center;font-size:24px;color:var(--accent);padding:150px 2px 0}
   .ruota-result{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--panel);box-shadow:var(--shadow)}
   .ruota-result .chainchips{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:6px 0 12px}
@@ -623,7 +630,7 @@
     body.appendChild(el('button',{class:'btn',style:'margin:4px 0 6px',onclick:()=>{state.sel=group.slice();state.resultQuery='';closeDetail();renderAll();}},'Usa come selezione'));
     const pairs=[];
     for(let i=0;i<group.length;i++)for(let j=i+1;j<group.length;j++){const e=edgeOf(group[i],group[j]);if(e)pairs.push(e);}
-    body.appendChild(el('h3',{style:'margin:14px 0 4px;font-family:system-ui;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)'},`Perché funziona — ogni coppia (${pairs.length})`));
+    body.appendChild(el('h3',{style:'margin:14px 0 4px;font-family:var(--font-ui);font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)'},`Perché funziona — ogni coppia (${pairs.length})`));
     pairs.sort((a,b)=>(b.preparations?.length||0)-(a.preparations?.length||0)).forEach(e=>body.appendChild(pairNoteEl(e)));
     openDrawer();
   }
@@ -695,7 +702,7 @@
     const n=famOrder.length, step=2*Math.PI/n;
     famOrder.forEach((fid,i)=>{const p=document.createElementNS(SVGNS,'path');
       p.setAttribute('d',ringPath(4.5,15,-Math.PI/2+i*step,-Math.PI/2+(i+1)*step));
-      p.setAttribute('fill',famColor(fid)); p.setAttribute('stroke','var(--wheel-stroke)'); p.setAttribute('stroke-width','.5'); svg.appendChild(p);});
+      p.setAttribute('fill',famColor(fid)); svg.appendChild(p);});
     return svg;
   }
   // grande ruota concentrica: anello famiglie + anello ingredienti; colore=compatibile/selezionato, bianco=escluso
@@ -712,16 +719,16 @@
     spans.forEach(f=>{ const a0=-Math.PI/2+f.start*step, a1=-Math.PI/2+(f.start+f.count)*step, am=(a0+a1)/2;
       const on=!state.fam.size||state.fam.has(f.fid);
       const p=document.createElementNS(SVGNS,'path'); p.setAttribute('d',ringPath(R.fam0,R.fam1,a0,a1));
-      p.setAttribute('fill',on?famColor(f.fid):'#f4efe6'); p.setAttribute('class','fam-wedge'); p.style.cursor='pointer';
+      p.setAttribute('fill',on?famColor(f.fid):(isDark()?'#2a2218':'#f4efe6')); p.setAttribute('class','fam-wedge'); p.style.cursor='pointer';
       p.addEventListener('click',()=>{tog(state.fam,f.fid);renderAll();}); svg.appendChild(p);
       const [lx,ly]=pol((R.fam0+R.fam1)/2,am), deg=am*180/Math.PI, left=Math.cos(am)<0;
       const t=document.createElementNS(SVGNS,'text'); t.textContent=famById.get(f.fid).name; t.setAttribute('class','fam-label');
       t.setAttribute('x',lx); t.setAttribute('y',ly); t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','middle');
-      t.setAttribute('transform',`rotate(${left?deg+180:deg} ${lx} ${ly})`); t.setAttribute('fill',on?'#fff':'#b8ab97');
+      t.setAttribute('transform',`rotate(${left?deg+180:deg} ${lx} ${ly})`); t.setAttribute('fill',on?'#fff':(isDark()?'#6e6453':'#b8ab97'));
       t.addEventListener('click',()=>{tog(state.fam,f.fid);renderAll();}); svg.appendChild(t);
     });
     // anello ingredienti
-    const fs = N>50?7.5:10;
+    const fs = N>64?9 : N>40?10.5 : 12;
     ordered.forEach((id,i)=>{ const ing=byId.get(id), a0=-Math.PI/2+i*step, a1=a0+step, am=a0+step/2;
       const comp=compatible(id), picked=sel.has(id);
       const p=document.createElementNS(SVGNS,'path'); p.setAttribute('d',ringPath(R.ing0,R.ing1,a0,a1));
@@ -1046,18 +1053,18 @@
       const span=2*Math.PI*aw/tot, a0=a, a1=a+span, am=(a0+a1)/2; a=a1;
       const active=val>=8;
       const band=document.createElementNS(SVGNS,'path'); band.setAttribute('d',ringPath(Rb0,Rb1,a0+gap,a1-gap));
-      band.setAttribute('fill',active?cat.color:'#efe9dd'); band.setAttribute('class','mx-band');
+      band.setAttribute('fill',active?cat.color:(isDark()?'#2a2218':'#efe9dd')); band.setAttribute('class','mx-band');
       band.addEventListener('click',()=>{tog(state.matrixEmph,cat.id);renderMatrice();}); svg.appendChild(band);
       if(span>0.13){ const [lx,ly]=pol((Rb0+Rb1)/2,am),deg=am*180/Math.PI,left=Math.cos(am)<0;
         const t=document.createElementNS(SVGNS,'text'); t.textContent=cat.name; t.setAttribute('class','mx-cat-label');
         t.setAttribute('x',lx);t.setAttribute('y',ly);t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');
-        t.setAttribute('transform',`rotate(${left?deg+180:deg} ${lx} ${ly})`); t.setAttribute('fill',active?'#fff':'#b8ab97'); svg.appendChild(t); }
+        t.setAttribute('transform',`rotate(${left?deg+180:deg} ${lx} ${ly})`); t.setAttribute('fill',active?'#fff':(isDark()?'#6e6453':'#b8ab97')); svg.appendChild(t); }
       const ds=cat.descriptors||[], dstep=span/(ds.length||1);
       ds.forEach((d,di)=>{ const b0=a0+di*dstep, b1=b0+dstep;
         let L=(val/100)*d.w*jitter(id+cat.id+d.name); if(emph.size) L*=emph.has(cat.id)?1.25:0.75; L=Math.max(0,Math.min(1.2,L));
         const r1=R0+(active? 8+L*(Rmax-R0-8) : 6);
         const p=document.createElementNS(SVGNS,'path'); p.setAttribute('d',ringPath(R0,r1,b0+gap,b1-gap));
-        p.setAttribute('fill',active?cat.color:'#ece5d8'); p.setAttribute('class','mx-bar-wedge'); if(active) p.setAttribute('fill-opacity',(0.5+0.5*val/100).toFixed(2));
+        p.setAttribute('fill',active?cat.color:(isDark()?'#33291f':'#ece5d8')); p.setAttribute('class','mx-bar-wedge'); if(active) p.setAttribute('fill-opacity',(0.5+0.5*val/100).toFixed(2));
         const g=document.createElementNS(SVGNS,'g'); g.appendChild(p);
         g.addEventListener('mouseenter',()=>{if(center)center.textContent=d.name;});
         g.addEventListener('mouseleave',()=>{if(center)center.textContent=cname;});
@@ -1126,7 +1133,7 @@
       .sort((a,b)=>a.name.localeCompare(b.name)).forEach(i=>ordered.push(i.id)));
     ids.forEach(id=>{if(!ordered.includes(id))ordered.push(id);});
     const N=ordered.length||1, R0=30, R1=125, RL=R1+7, half=262;
-    const fs = N>50?8 : N>24?10 : N>12?12 : 14;
+    const fs = N>50?9.5 : N>24?12 : N>12?13.5 : 15;
     const svg=document.createElementNS(NS,'svg');
     svg.setAttribute('viewBox',`${-half} ${-half} ${2*half} ${2*half}`);
     svg.setAttribute('class','wheel-svg');
@@ -1346,7 +1353,7 @@
     // accostamenti con la selezione, oppure tutti
     const targets = state.sel.filter(s=>s!==id && adj.get(id).has(s));
     const list = targets.length? targets : Array.from(adj.get(id));
-    body.appendChild(el('h3',{style:'margin:16px 0 4px;font-family:system-ui;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)'},
+    body.appendChild(el('h3',{style:'margin:16px 0 4px;font-family:var(--font-ui);font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)'},
       targets.length?`Accostamenti con la selezione (${targets.length})`:`Tutti gli accostamenti (${list.length})`));
 
     list.map(o=>edgeOf(id,o)).filter(Boolean)
