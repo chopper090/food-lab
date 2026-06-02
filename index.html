@@ -869,7 +869,7 @@
   // ---- dispatcher a schede ----
   function renderNav(){
     const nav=document.getElementById('nav');nav.innerHTML='';
-    [['esplora','🧪 Esplora'],['ruota','🎡 Ruota'],['matrice','🧬 Matrice'],['stagione','📅 Stagione'],['feste','🎉 Feste'],['fonti','ℹ️ Fonti']].forEach(([id,label])=>{
+    [['esplora','🧪 Esplora'],['ruota','🎡 Ruota'],['stagione','📅 Stagione'],['feste','🎉 Feste'],['fonti','ℹ️ Fonti']].forEach(([id,label])=>{
       nav.appendChild(el('button',{class:'navbtn'+(state.tab===id?' on':''),onclick:()=>{state.tab=id;state.occasionView=null;closeSide();renderAll();}},label));
     });
   }
@@ -877,7 +877,6 @@
     const main=document.getElementById('main');
     if(renderMain._last!==state.tab){ main.classList.remove('fade'); void main.offsetWidth; main.classList.add('fade'); renderMain._last=state.tab; }
     if(state.tab==='ruota') return renderRuota();
-    if(state.tab==='matrice') return renderMatrice();
     if(state.tab==='stagione') return renderStagione();
     if(state.tab==='feste') return renderFeste();
     if(state.tab==='fonti') return renderFonti();
@@ -1365,20 +1364,6 @@
       });
     }
 
-    // affinità di profilo aromatico (stima AI, dalla matrice) — terzo segnale, ben etichettato
-    if(MRULES){
-      const pa=profileOf(id), ss=Object.values(pa).reduce((a,b)=>a+b,0)||1;
-      const aff=D.book.ingredients.map(x=>x.id).filter(x=>x!==id)
-        .map(x=>{const pb=profileOf(x);let s=0;for(const c in pa){if(pb[c])s+=Math.min(pa[c],pb[c]);}return {x,s};})
-        .filter(o=>o.s>0).sort((a,b)=>b.s-a.s).slice(0,6);
-      if(aff.length){
-        body.appendChild(el('h3',{class:'drawer-h3'},'Affinità di profilo (stima AI)'));
-        const ac=el('div',{class:'chips'});
-        aff.forEach(o=>{const on=byId.get(o.x);ac.appendChild(el('button',{class:'chip',title:'spunto dalla matrice (AI), non dal libro',onclick:()=>openDetail(o.x)},
-          el('span',{class:'dot',style:`background:${famColor(on.family)}`}),on.name+' ~'+Math.round(100*o.s/ss)+'%'));});
-        body.appendChild(ac);
-      }
-    }
     // accostamenti con la selezione, oppure tutti
     const targets = state.sel.filter(s=>s!==id && adj.get(id).has(s));
     const list = targets.length? targets : Array.from(adj.get(id));
