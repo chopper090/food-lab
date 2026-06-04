@@ -1,5 +1,5 @@
 /* Umami — Matrice dei Sapori · service worker — cache-first per il guscio app + dati (offline). */
-const CACHE = 'umami-v3';
+const CACHE = 'umami-v3.0.0';
 const ASSETS = ['./', './index.html', './data/data.js', './icon.svg', './manifest.webmanifest', './fonts/inter-latin.woff2', './fonts/fraunces-latin.woff2'];
 
 self.addEventListener('install', e => {
