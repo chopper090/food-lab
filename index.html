@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>FOOD LAB — Matrice dei Sapori</title>
+<title>Umami — Matrice dei Sapori</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#c2611f">
 <link rel="icon" href="./icon.svg">
@@ -295,7 +295,7 @@
 <body>
 <header>
   <button id="menuBtn" class="menu-btn" aria-label="Apri/chiudi pannello">☰</button>
-  <h1><span id="logo" class="logo"></span>FOOD<span style="color:var(--accent)">·</span>LAB</h1>
+  <h1><span id="logo" class="logo"></span>Umami</h1>
   <nav id="nav" class="nav"></nav>
   <button id="themeBtn" class="icon-btn" aria-label="Cambia tema chiaro/scuro" title="Tema chiaro/scuro">🌙</button>
 </header>
@@ -759,7 +759,7 @@
     const hub=document.createElementNS(SVGNS,'circle'); hub.setAttribute('r',R.hub); hub.setAttribute('class','wheel-hub');
     hub.addEventListener('click',()=>{ if(state.focusIng){ state.focusIng=null; setCenter(def()); svg.querySelectorAll('g.focus').forEach(e=>e.classList.remove('focus')); opts.onFocus&&opts.onFocus(null); } else if(state.sel.length){state.sel=[];state.resultQuery='';renderAll();} }); svg.appendChild(hub);
     const center=document.createElementNS(SVGNS,'text'); center.setAttribute('class','wheel-center'); center.setAttribute('text-anchor','middle'); center.setAttribute('dominant-baseline','middle');
-    const def=()=> state.sel.length? (state.sel.length+(state.sel.length===1?' scelto':' scelti')) : 'FOOD·LAB';
+    const def=()=> state.sel.length? (state.sel.length+(state.sel.length===1?' scelto':' scelti')) : 'Umami';
     const setCenter=txt=>{center.textContent=txt; center.style.fontSize=(txt.length>13?Math.max(8,Math.round(150/txt.length)):11.5)+'px';};
     function focusName(){ return state.focusIng? byId.get(state.focusIng).name : def(); }
     function setFocus(fid){ state.focusIng=fid; svg.querySelectorAll('g.focus').forEach(e=>e.classList.remove('focus')); const grp=svg.querySelector('g[data-ing="'+fid+'"]'); if(grp) grp.classList.add('focus'); setCenter(byId.get(fid).name); opts.onFocus&&opts.onFocus(fid); }

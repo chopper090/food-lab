@@ -1,4 +1,4 @@
-# FOOD·LAB — Matrice dei Sapori
+# Umami — Matrice dei Sapori
 
 App (PWA, single-file, vanilla JS) per esplorare **accostamenti, combinazioni e profili aromatici** degli ingredienti e aiutare la creazione di piatti.
 
