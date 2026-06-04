@@ -1,6 +1,6 @@
-/* FOOD LAB service worker — cache-first per il guscio app + dati (offline). */
-const CACHE = 'foodlab-v1';
-const ASSETS = ['./', './index.html', './data/data.js', './icon.svg', './manifest.webmanifest'];
+/* Umami — Matrice dei Sapori · service worker — cache-first per il guscio app + dati (offline). */
+const CACHE = 'umami-v3';
+const ASSETS = ['./', './index.html', './data/data.js', './icon.svg', './manifest.webmanifest', './fonts/inter-latin.woff2', './fonts/fraunces-latin.woff2'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

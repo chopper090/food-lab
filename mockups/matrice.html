@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FOOD·LAB — Mockup · Matrice</title>
+<style>
+@font-face{font-family:'Inter';font-weight:100 900;font-display:swap;src:url('../fonts/inter-latin.woff2') format('woff2')}
+@font-face{font-family:'Fraunces';font-weight:100 900;font-display:swap;src:url('../fonts/fraunces-latin.woff2') format('woff2')}
+:root{--bg:#f4f0e8;--panel:#fffefb;--surface:#fff;--ink:#23201c;--muted:#857a6b;--faint:#b3a892;--line:#e6ddcd;--accent:#d4521f;--accent-ink:#c2611f;--accent-soft:#fbe6d8;--hub:#2b2622;--ok:#5a8a3c;--warn:#b8742a;--radius:16px;--shadow:0 1px 2px rgba(60,40,20,.05),0 12px 32px -14px rgba(60,40,20,.22);--font-ui:'Inter',system-ui,-apple-system,sans-serif;--font-display:'Fraunces',Georgia,serif}
+[data-theme="dark"]{--bg:#14110d;--panel:#211b15;--surface:#281f17;--ink:#f1ebe0;--muted:#a89c8a;--faint:#6e6453;--line:#332a20;--accent:#f07a45;--accent-ink:#f3936b;--accent-soft:#39241a;--hub:#34291e;--ok:#8cc06a;--warn:#e6a54b}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.6 var(--font-ui);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+h1,h2{font-family:var(--font-display);font-weight:600;margin:0;letter-spacing:-.01em}
+header{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:14px;padding:13px 24px;background:var(--panel);border-bottom:1px solid var(--line)}
+header h1{font-size:21px}
+header .tag{color:var(--muted);font-size:13px}
+.toggle{margin-left:auto;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:11px;width:38px;height:34px;font-size:16px;cursor:pointer}
+.wrap{max-width:1100px;margin:0 auto;padding:24px}
+.intro{color:var(--muted);max-width:820px;margin:0 0 16px;font-size:14.5px}
+.pick{display:flex;align-items:center;gap:10px;margin:0 0 22px}
+.pick label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600}
+select{font:inherit;font-size:14px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);min-width:220px}
+.opt{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:22px 24px 26px;margin-bottom:24px;box-shadow:var(--shadow)}
+.opt .h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.opt .code{font-family:var(--font-display);font-size:26px;color:var(--accent-ink);font-weight:600}
+.opt h2{font-size:21px}
+.opt .desc{color:var(--muted);font-size:13.5px;margin:6px 0 16px;max-width:820px}
+.stage{display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap;min-height:280px}
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.pros{display:flex;gap:20px;flex-wrap:wrap;font-size:12.5px;margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+.pros .p{color:var(--ok)}.pros .c{color:var(--warn)}
+svg{overflow:visible;max-width:96%;height:auto}
+.hub{fill:var(--hub)}
+.hubtext{fill:#fff;font-family:var(--font-display);font-weight:600;pointer-events:none}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:7px 13px;cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.act{background:var(--accent);border-color:var(--accent);color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;margin-top:14px;max-width:760px}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted)}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.barrow{display:flex;align-items:center;gap:12px}
+.barrow .lab{width:160px;text-align:right;font-size:13px;flex:0 0 auto}
+.barrow .track{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:8px;height:22px;overflow:hidden}
+.barrow .fill{height:100%;border-radius:7px 0 0 7px;transition:width .4s ease}
+.barrow .v{width:30px;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<header>
+  <h1>FOOD<span style="color:var(--accent)">·</span>LAB</h1>
+  <span class="tag">Mockup · «Matrice» (profilo aromatico) — 3 alternative</span>
+  <button class="toggle" id="tg" title="tema">🌙</button>
+</header>
+<div class="wrap">
+  <p class="intro">Tre modi di mostrare il profilo aromatico di un ingrediente (quanto "sa di" ogni famiglia aromatica), con i <b>dati reali</b>. Cambia ingrediente qui sotto per vedere come si comportano.</p>
+  <div class="pick"><label for="sel">Ingrediente</label><select id="sel"></select></div>
+
+  <div class="opt"><div class="h"><span class="code">M1</span><h2>Barre orizzontali</h2></div>
+    <p class="desc">Ogni descrittore aromatico = una barra orizzontale etichettata, lunghezza = affinità, <b>ordinata dal più forte</b>. Niente troncamenti, confronto immediato, perfetta su mobile.</p>
+    <div class="stage" id="stageM1"></div>
+    <div class="pros"><span class="p"><b>+</b> leggibilità massima · confronto facile · mobile-friendly</span><span class="c"><b>−</b> meno "scenografica" del radiale</span></div>
+  </div>
+
+  <div class="opt"><div class="h"><span class="code">M2</span><h2>Radiale fatto bene</h2></div>
+    <p class="desc">Il "fiore" radiale ma <b>centrato, grande, con le etichette FUORI</b> dai raggi (niente sovrapposizioni né tagli) e una legenda. Mantiene l'identità scenografica, leggibile.</p>
+    <div class="stage" id="stageM2"></div>
+    <div class="legend" id="legM2"></div>
+    <div class="pros"><span class="p"><b>+</b> d'impatto · mantiene il carattere "matrice"</span><span class="c"><b>−</b> meno preciso da leggere dei numeri</span></div>
+  </div>
+
+  <div class="opt"><div class="h"><span class="code">M4</span><h2>Barre + radiale (toggle)</h2></div>
+    <p class="desc">Il meglio dei due: <b>barre chiare di default</b>, con un interruttore per passare alla <b>vista radiale</b> quando vuoi l'effetto scenografico. <b>Prova il toggle.</b></p>
+    <div class="bar" id="barM4"></div>
+    <div class="stage" id="stageM4"></div>
+    <div class="pros"><span class="p"><b>+</b> leggibile di default + bello a richiesta · flessibile</span><span class="c"><b>−</b> due viste da mantenere</span></div>
+  </div>
+</div>
+
+<script src="../data/data.js"></script>
+<script>
+(function(){
+const D=window.FOODLAB_DATA;
+const ings=D.book.ingredients, fams=D.book.families;
+const byId=new Map(ings.map(i=>[i.id,i]));
+const famById=new Map(fams.map(f=>[f.id,f]));
+const M=D.matrix||{taxonomy:[],profiles:{}};
+const MTAX=M.taxonomy||[];
+const SVGNS='http://www.w3.org/2000/svg';
+const isDark=()=>document.documentElement.getAttribute('data-theme')==='dark';
+const pol=(r,a)=>[r*Math.cos(a),r*Math.sin(a)];
+function ringPath(r0,r1,a0,a1){const[x0,y0]=pol(r0,a0),[x1,y1]=pol(r1,a0),[x2,y2]=pol(r1,a1),[x3,y3]=pol(r0,a1);const lg=(a1-a0)>Math.PI?1:0;return `M${x0} ${y0} L${x1} ${y1} A${r1} ${r1} 0 ${lg} 1 ${x2} ${y2} L${x3} ${y3} A${r0} ${r0} 0 ${lg} 0 ${x0} ${y0} Z`;}
+function S(t,a){const e=document.createElementNS(SVGNS,t);if(a)for(const k in a)e.setAttribute(k,a[k]);return e;}
+function E(t,a,...kids){const e=document.createElement(t);if(a)for(const k in a){if(k==='class')e.className=a[k];else if(k==='style')e.setAttribute('style',a[k]);else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),a[k]);else e.setAttribute(k,a[k]);}kids.flat().forEach(c=>e.appendChild(typeof c==='string'?document.createTextNode(c):c));return e;}
+function newSvg(vb,w){const svg=S('svg',{viewBox:`${-vb} ${-vb} ${2*vb} ${2*vb}`});svg.style.width=w+'px';return svg;}
+function profileOf(id){
+  const R=M.rules;
+  if(!R) return (M.profiles&&M.profiles[id])||{};
+  const ing=byId.get(id); if(!ing) return {};
+  const famName=((famById.get(ing.family)||{}).name||'').toLowerCase();
+  const meta=(D.meta&&D.meta.ingredient_meta&&D.meta.ingredient_meta[id])||{};
+  const typ=meta.type||'';
+  const raw={},add=(d,k)=>{if(d)for(const c in d)raw[c]=(raw[c]||0)+k*d[c];};
+  add(R.type_w&&R.type_w[typ],0.45);add(R.fam_w&&R.fam_w[famName],0.55);add(R.ovr&&R.ovr[id],1.0);
+  const vals=Object.values(raw);if(!vals.length)return (M.profiles&&M.profiles[id])||{};
+  const m=Math.max.apply(null,vals),out={};
+  for(const c in raw){const v=Math.round(100*raw[c]/m);if(v>=8)out[c]=v;}
+  return out;
+}
+function rows(id){return MTAX.map(c=>({c,v:profileOf(id)[c.id]||0})).filter(r=>r.v>0).sort((a,b)=>b.v-a.v);}
+
+function renderM1(stage,id){
+  stage.innerHTML='';
+  const rs=rows(id), maxV=Math.max(...rs.map(r=>r.v),1);
+  const box=E('div',{style:'width:100%;max-width:640px;display:flex;flex-direction:column;gap:9px'});
+  if(!rs.length){box.appendChild(E('div',{style:'color:var(--muted)'},'(nessun profilo)'));}
+  rs.forEach(({c,v})=>{
+    box.appendChild(E('div',{class:'barrow'},
+      E('div',{class:'lab'},c.name),
+      E('div',{class:'track'},E('div',{class:'fill',style:`width:${100*v/maxV}%;background:${c.color}`})),
+      E('div',{class:'v'},String(v))));
+  });
+  stage.appendChild(box);
+}
+
+function renderM2(stage,leg,id){
+  stage.innerHTML='';if(leg)leg.innerHTML='';
+  const rs=rows(id), n=rs.length||1, maxV=Math.max(...rs.map(r=>r.v),1);
+  const vb=230, svg=newSvg(vb,440), R0=46, Rmax=vb-62, step=2*Math.PI/n;
+  rs.forEach((r,i)=>{const a0=-Math.PI/2+i*step,a1=a0+step*0.78,am=(a0+a1)/2;
+    const r1=R0+(r.v/maxV)*(Rmax-R0);
+    svg.appendChild(S('path',{d:ringPath(R0,r1,a0,a1),fill:r.c.color,'fill-opacity':(0.55+0.45*r.v/maxV).toFixed(2),stroke:'var(--panel)','stroke-width':.7}));
+    const[lx,ly]=pol(Rmax+10,am),left=Math.cos(am)<0,deg=am*180/Math.PI;
+    const t=S('text',{x:lx,y:ly,'font-size':8.5,fill:'var(--ink)','text-anchor':left?'end':'start','dominant-baseline':'middle',transform:`rotate(${left?deg+180:deg} ${lx} ${ly})`});
+    t.style.fontFamily='var(--font-ui)';t.style.fontWeight='500';t.textContent=r.c.name;svg.appendChild(t);
+  });
+  svg.appendChild(S('circle',{r:R0-2,class:'hub'}));
+  const nm=byId.get(id).name;
+  const c=S('text',{class:'hubtext','text-anchor':'middle','dominant-baseline':'middle','font-size':nm.length>10?10:12.5});c.textContent=nm;svg.appendChild(c);
+  stage.appendChild(svg);
+  if(leg){rs.slice(0,12).forEach(({c,v})=>leg.appendChild(E('span',{},E('i',{style:`background:${c.color}`}),c.name+' · '+v)));}
+}
+
+function renderM4(stage,bar,id){
+  let mode='bars';
+  function draw(){
+    bar.innerHTML='';
+    bar.appendChild(E('button',{class:'btn'+(mode==='bars'?' act':''),onclick:()=>{mode='bars';draw();}},'▭ barre'));
+    bar.appendChild(E('button',{class:'btn'+(mode==='radial'?' act':''),onclick:()=>{mode='radial';draw();}},'❋ radiale'));
+    if(mode==='bars')renderM1(stage,id); else renderM2(stage,null,id);
+  }
+  draw();
+}
+
+const sel=document.getElementById('sel');
+ings.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(i=>sel.appendChild(E('option',{value:i.id},i.name)));
+sel.value = byId.get('pomodoro')?'pomodoro':ings[0].id;
+function renderAll(){
+  const id=sel.value;
+  renderM1(document.getElementById('stageM1'),id);
+  renderM2(document.getElementById('stageM2'),document.getElementById('legM2'),id);
+  renderM4(document.getElementById('stageM4'),document.getElementById('barM4'),id);
+}
+sel.addEventListener('change',renderAll);
+document.getElementById('tg').addEventListener('click',()=>{
+  const d=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',d?'light':'dark');
+  document.getElementById('tg').textContent=d?'🌙':'☀️';
+  renderAll();
+});
+renderAll();
+})();
+</script>
+</body>
+</html>
